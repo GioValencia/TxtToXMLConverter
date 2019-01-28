@@ -47,7 +47,7 @@ public class XMLFile
         saveXML(XMLArr);
     }
 
-    public void spitTags()
+    public void splitTags()
     {
         List<string> tags = new List<string>();
         //reading rates and nothing else
@@ -55,11 +55,28 @@ public class XMLFile
         {
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
+                //Adds what you want after the skippable tag
+                string[] words = s.Split(' ');
+                foreach (var word in words)
+                {
+                    if (word != "[START]" && word !=" ")
+                    {
+                        tags.Add(word);
+                    }
+                }
 
             }
-            else if (s.Contains("RATEGROUP"))//Stopping point
+            else if (s.Contains("[RATEMETHOD]"))//Stopping point
             {
-                break;
+                //Adds what you want after the skippable tag
+                string[] words = s.Split(' ');
+                foreach (var word in words)
+                {
+                    if (word != "[RATEMETHOD]" && word != " ")
+                    {
+                        tags.Add(word);
+                    }
+                }
             }
             else
             {
@@ -74,3 +91,35 @@ public class XMLFile
     }
 
 }
+
+/*
+string misc = "";
+string qtymethod = "";
+string currency = "";
+string service = "";
+string rateGroup = "<RateGroup Version=\"1\" QtyMethod="+ "\""+qtymethod+"\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">"; 
+string closingTag = "</RateGroup>";
+
+string misc = "";
+string min = "";
+string zone = "";
+string weight = "";
+string pkgtype = "";
+string rateRead = ""; // make sure the ints are toString() so they work in the string
+string rate = "<Rate Zone="+ "\"" + zone+ "\"" + " Weight="+ "\""+weight+ "\" " + "PkgType=" + "\"" + pkgtype+ "\"" + ">" +rateRead+"</Rate>"; 
+string closingTag = "</Rate>";
+
+
+if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
+            {
+                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\"" + ">" + rateRead + "</Rate>";
+
+            }
+            else if (rate.Contains("misc")){
+                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>";
+            }
+            else
+            {
+                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Min=" + "\"" + min + "\"" + ">" + rateRead + "</Rate>";
+            }
+*/
