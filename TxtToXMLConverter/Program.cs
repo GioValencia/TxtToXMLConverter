@@ -143,4 +143,13 @@ if(s.Contains("[LETTER]")){
 
 
    make 1 loop for zones to save them and have them for reference everytime there is going to be new rates coming out.
+   
+   Inside the document there could be empty spaces for rates we used "_" to fill them up. So we can match the zone to the rate. Or to somehow
+   leave it empty but without it not matching the zones to rates at the same time.
+    
+   if(rateRead == "_"){
+    assign the array 1 spot ahead. so it lines up with the zones
+    we can use a bubble sort of somekind and switch it up.
+   }
+    
    */
