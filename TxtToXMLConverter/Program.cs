@@ -17,6 +17,7 @@ public class ReadFile
 
 public class XMLFile
 {
+    //change filename to dynamic
     private string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
     private string[] XMLArr;
@@ -123,3 +124,23 @@ if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
                 rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Min=" + "\"" + min + "\"" + ">" + rateRead + "</Rate>";
             }
 */
+
+// Arraylist for letters
+
+/*
+ArrayList<string> letter = new ArrayList<string>();
+if(s.Contains("[LETTER]")){
+   pkgtype="CARRIER_LETTER";
+
+
+
+   foreach(item in that letter array){
+   letter.add();//adds every other item inside the letter arraylist
+   finalfile.add(rate);
+   }
+
+   }
+
+
+   make 1 loop for zones to save them and have them for reference everytime there is going to be new rates coming out.
+   */
