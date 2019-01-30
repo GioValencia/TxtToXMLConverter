@@ -186,7 +186,7 @@ if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
 */
 
 // Arraylist for letters
-
+asdasd
 /*
 ArrayList<string> letter = new ArrayList<string>();
 if(s.Contains("[LETTER]")){
