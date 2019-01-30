@@ -142,24 +142,23 @@ if(s.Contains("[LETTER]")){
    }
 
 
-   make 1 loop for zones to save them and have them for reference everytime there is going to be new rates coming out.
-   
-   Inside the document there could be empty spaces for rates we used "_" to fill them up. So we can match the zone to the rate. Or to somehow
-   leave it empty but without it not matching the zones to rates at the same time.
-    
-    string rateReadTemp = "";
-   
-    assign the array 1 spot ahead. so it lines up with the zones
-    we can use a bubble sort of somekind and switch it up.
-    arraylist or array
-    
-    foreach i in loop{
-    if(rateRead == "_"){
-    rateReadTemp = array[i];
-    array[i] = " ";
-    array[i+1] = rateReadTemp;
+  // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
+  string[] zonearray = new string[];
+  string[] rateValuesUnderScore = new string[]
+  int normalvaluecounter = 0;
+  for(int i = 0; i < rateValuesUnderScore.length; i++){
+  if(rateValuesUnderScore[i] != "_"){
+        normalvaluecounter++;
     }
-    
-   }
+  }
+  
+  int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
+  int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
+  
+  for(int i=0; i < indexRateStart; i++){
+  weight = indexRateStart[i];
+  zone = indexZoneStart[i];
+  arraylist.push(rate);
+  }
     
    */
