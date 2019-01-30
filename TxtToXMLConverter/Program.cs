@@ -51,6 +51,10 @@ public class XMLFile
     public void splitTags()
     {
         List<string> tags = new List<string>();
+        List<string>[] tagData = new List<string>[1000];
+        int count = 0;
+        List<string> temp;
+        string pkgtype;
         //reading rates and nothing else
         foreach (string s in txtDoc)
         {
@@ -58,26 +62,82 @@ public class XMLFile
             {
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(' ');
+                temp = new List<string>();
+                pkgtype = "START";
                 foreach (var word in words)
                 {
                     if (word != "[START]" && word !=" ")
                     {
-                        tags.Add(word);
+                        temp.Add(word);
                     }
                 }
+
+                tagData[count] = temp;
+                tags.Add(pkgtype);
+                count++;
 
             }
             else if (s.Contains("[RATEMETHOD]"))//Stopping point
             {
                 //Adds what you want after the skippable tag
+                temp = new List<string>();
+                pkgtype = "DISCOUNT";
                 string[] words = s.Split(' ');
                 foreach (var word in words)
                 {
                     if (word != "[RATEMETHOD]" && word != " ")
                     {
-                        tags.Add(word);
+                        temp.Add(word);
                     }
                 }
+                tagData[count] = temp;
+                tags.Add(pkgtype);
+                count++;
+            }
+            else if (s.Contains("[ZONES]") || s[0] != '-')
+            {
+                temp = new List<string>();
+                string[] words = s.Split(' ');
+                int underScoreCount = 0;
+                foreach (var word in words)
+                {
+                    if (word != "[ZONES]" && word != "[END]" && word != " ")
+                    {
+                        if (word == "_")
+                        {
+                            underScoreCount++;
+                        }
+                        else
+                        {
+                            temp.Add(word);
+                        }
+                    }
+                    if (word == "[END]")
+                    {
+                        break;
+                    }
+                }
+                tagData[count] = temp;
+                //tags.Add(pkgtype);
+                count++;
+
+            }
+            else if (s.Contains("[LETTER]"))
+            {
+                pkgtype = "CARRIER_LETTER";
+                temp = new List<string>();
+                string[] words = s.Split(' ');
+                foreach (var word in words)
+                {
+                    if (word != "[LETTER]" && word != " ")
+                    {
+                        temp.Add(word);
+                    }
+                }
+                tagData[count] = temp;
+                tags.Add(pkgtype);
+                count++;
+
             }
             else
             {
@@ -136,6 +196,9 @@ if(s.Contains("[LETTER]")){
 
    foreach(item in that letter array){
    letter.add();//adds every other item inside the letter arraylist
+
+
+    //DO LATER WHEN STRUCTURE IS READY
    finalfile.add(rate);
    }
 
@@ -144,3 +207,36 @@ if(s.Contains("[LETTER]")){
 
    make 1 loop for zones to save them and have them for reference everytime there is going to be new rates coming out.
    */
+
+/*
+ * // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
+ * 
+ * 
+ string[] zonearray = new string[];
+string[] rateValuesUnderScore = new string[]
+int normalvaluecounter = 0;
+for(int i = 0; i < rateValuesUnderScore.length; i++){
+if(rateValuesUnderScore[i] != "_"){
+    normalvaluecounter++;
+}
+}
+
+int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
+int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
+
+for(int i=0; i < indexRateStart; i++){
+weight = indexRateStart[i];
+zone = indexZoneStart[i];
+arraylist.push(rate);
+}
+*/
+
+/*
+            string weightBasis = "";
+            string additionalAmount = "";
+            string weightIncrement = "";
+            string rateRead = additionalAmount * weightBasis;// parse into a double and then back into a toString for the rates
+            if ([TIER]) {
+                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "WeightBasis=" + "\"" + weightBasis + "\"" + "AdditionalAmount=" + "\"" + additionalAmount + "\"" + "WeightIncrement=" + "\"" + weightIncrement + "\"" + ">" + rateRead + "</Rate>";
+            }
+            */
