@@ -205,7 +205,25 @@ if(s.Contains("[LETTER]")){
    }
 
 
-   make 1 loop for zones to save them and have them for reference everytime there is going to be new rates coming out.
+  // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
+  string[] zonearray = new string[];
+  string[] rateValuesUnderScore = new string[]
+  int normalvaluecounter = 0;
+  for(int i = 0; i < rateValuesUnderScore.length; i++){
+  if(rateValuesUnderScore[i] != "_"){
+        normalvaluecounter++;
+    }
+  }
+  
+  int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
+  int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
+  
+  for(int i=0; i < indexRateStart; i++){
+  weight = indexRateStart[i];
+  zone = indexZoneStart[i];
+  arraylist.push(rate);
+  }
+    
    */
 
 /*
