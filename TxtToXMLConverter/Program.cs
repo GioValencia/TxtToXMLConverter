@@ -81,7 +81,7 @@ public class XMLFile
             {
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
-                pkgtype = "DISCOUNT";
+               // pkgtype = "DISCOUNT";
                 string[] words = s.Split(' ');
                 foreach (var word in words)
                 {
