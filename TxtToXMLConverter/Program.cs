@@ -54,6 +54,7 @@ public class XMLFile
         List<string>[] tagData = new List<string>[1000];
         int count = 0;
         List<string> temp;
+        double checkVar;
 
         //Variables
         string pkgtype = "";
@@ -100,6 +101,7 @@ public class XMLFile
             {
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
+                // pkgtype = "DISCOUNT";
                 string[] words = s.Split(' ');
                 foreach (var word in words)
                 {
@@ -155,6 +157,10 @@ public class XMLFile
                 tagData[count] = temp;
                 tags.Add(rate);
                 count++;
+
+            }
+            else if (Double.TryParse(s.Substring(0, s.IndexOf(" ")), out checkVar))
+            {
 
             }
             else
