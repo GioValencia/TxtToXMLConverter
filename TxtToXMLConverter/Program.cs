@@ -10,7 +10,7 @@ public class ReadFile
     public ReadFile(string path)
     {
         //filePath = path;
-        content = System.IO.File.ReadAllLines(path);
+        content = File.ReadAllLines(path);
     }
 
 }
@@ -22,16 +22,16 @@ public class XMLFile
     private string[] txtDoc;
     private string[] XMLArr;
 
-    public XMLFile(ReadFile file)
+    public XMLFile(/*ReadFile file*/)
     {
         //saveLocation = Path.Combine(file.filePath, "_TXTinXMLFormat.txt");
-        txtDoc = file.content;
+        txtDoc = File.ReadAllLines(@"C:\Users\GiovanniValencia\Desktop\GSAApp\EXP.txt");
     }
 
     //Saves XML file at location specified, currently set to Desktop by default
     public void saveXML(string[] XMLarr)
     {
-        System.IO.File.WriteAllLines(saveLocation, XMLArr);
+        File.WriteAllLines(saveLocation, XMLArr);
     }
 
     //Changes the txtDoc array to a format readable in XML
@@ -50,7 +50,6 @@ public class XMLFile
 
     public void splitTags()
     {
-        List<string> tags = new List<string>();
         List<string>[] tagData = new List<string>[1000];
         int count = 0;
         List<string> temp;
@@ -64,7 +63,7 @@ public class XMLFile
         string service = "";
         string min = "";
         string zone = "";
-        string weight = "";
+        List<string> weight = new List<string>();
         string rateRead = ""; // make sure the ints are toString() so they work in the string
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
@@ -93,7 +92,7 @@ public class XMLFile
                 }
 
                 tagData[count] = temp;
-                tags.Add(rate);
+
                 count++;
 
             }
@@ -102,7 +101,7 @@ public class XMLFile
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
                 // pkgtype = "DISCOUNT";
-                string[] words = s.Split(' ');
+                string[] words = s.Split(null);
                 foreach (var word in words)
                 {
                     if (word != "[RATEMETHOD]" && word != " ")
@@ -111,10 +110,10 @@ public class XMLFile
                     }
                 }
                 tagData[count] = temp;
-                tags.Add(rate);
+
                 count++;
             }
-            else if (s.Contains("[ZONES]") || s[0] != '-')
+            else if (s.Contains("[ZONES]"))
             {
                 temp = new List<string>();
                 string[] words = s.Split(' ');
@@ -138,7 +137,7 @@ public class XMLFile
                     }
                 }
                 tagData[count] = temp;
-                //tags.Add(pkgtype);
+
                 count++;
 
             }
@@ -155,23 +154,41 @@ public class XMLFile
                     }
                 }
                 tagData[count] = temp;
-                tags.Add(rate);
+
                 count++;
 
             }
-            else if (Double.TryParse(s.Substring(0, s.IndexOf(" ")), out checkVar))
+            else if (s[0] == '-')
             {
-
+                //TIERS sections
+            }
+            else if (s.Length >=0 &&!(s[0].Equals("[END]")) && !(s[0].Equals("[ZONES]")) && !(s[0].Equals("[TIERS]")) && !(s[0].Equals("[START]")) && !(s[0].Equals("[LETTER]")) && !(s[0].Equals("[RATEMETHOD]")) && !(s[0].Equals("[CONDITIONAL]")))
+            {
+                //Length cannot be less than 0 RUNTIME error
+                if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
+                {
+                    string[] nums = s.Split(null);
+                    weight.Add(nums[0]);
+                    for (int i = 1; i < nums.Length; i++)
+                    {
+                        rateRead = nums[i];
+                        File.AppendAllText(saveLocation, rate);
+                    }
+                }
             }
             else
             {
-                tags.Add(s);//adds line to list for later
+                //adds line to list for later
             }
         }
     }
 
     public static void Main(String[] args)
     {
+
+        XMLFile test = new XMLFile();
+
+        test.splitTags();
 
     }
 
