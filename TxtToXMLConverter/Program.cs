@@ -162,7 +162,7 @@ public class XMLFile
             {
                 //TIERS sections
             }
-            else if (s.Length >=0 &&!(s[0].Equals("[END]")) && !(s[0].Equals("[ZONES]")) && !(s[0].Equals("[TIERS]")) && !(s[0].Equals("[START]")) && !(s[0].Equals("[LETTER]")) && !(s[0].Equals("[RATEMETHOD]")) && !(s[0].Equals("[CONDITIONAL]")))
+            else if (s.Length >=0 && !(s.Equals("[END]")) && !(s[0].Equals("[ZONES]")) && !(s[0].Equals("[TIERS]")) && !(s[0].Equals("[START]")) && !(s[0].Equals("[LETTER]")) && !(s[0].Equals("[RATEMETHOD]")) && !(s[0].Equals("[CONDITIONAL]")))
             {
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
