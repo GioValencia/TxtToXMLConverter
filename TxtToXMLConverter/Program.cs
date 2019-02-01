@@ -172,7 +172,7 @@ public class XMLFile
                     for (int i = 1; i < nums.Length; i++)
                     {
                         rateRead = nums[i];
-                        File.AppendAllText(saveLocation, rate);
+                        File.AppendAllText(saveLocation, rate + Environment.NewLine);
                     }
                 }
             }
