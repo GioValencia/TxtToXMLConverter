@@ -54,7 +54,26 @@ public class XMLFile
         List<string>[] tagData = new List<string>[1000];
         int count = 0;
         List<string> temp;
-        string pkgtype;
+
+        //Variables
+        string pkgtype = "";
+        string misc = "";
+        string qtymethod = "";
+        string currency = "";
+        string service = "";
+        string min = "";
+        string zone = "";
+        string weight = "";
+        string rateRead = ""; // make sure the ints are toString() so they work in the string
+
+        string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+        string closingRateGroupTag = "</RateGroup>";
+        string rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
+        string closingRateTag = "</Rate>";
+        //Variables
+
+
+
         //reading rates and nothing else
         foreach (string s in txtDoc)
         {
@@ -63,17 +82,17 @@ public class XMLFile
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(' ');
                 temp = new List<string>();
-                pkgtype = "START";
+
                 foreach (var word in words)
                 {
-                    if (word != "[START]" && word !=" ")
+                    if (word != "[START]" && word != " ")
                     {
                         temp.Add(word);
                     }
                 }
 
                 tagData[count] = temp;
-                tags.Add(pkgtype);
+                tags.Add(rate);
                 count++;
 
             }
@@ -81,7 +100,6 @@ public class XMLFile
             {
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
-                pkgtype = "DISCOUNT";
                 string[] words = s.Split(' ');
                 foreach (var word in words)
                 {
@@ -91,7 +109,7 @@ public class XMLFile
                     }
                 }
                 tagData[count] = temp;
-                tags.Add(pkgtype);
+                tags.Add(rate);
                 count++;
             }
             else if (s.Contains("[ZONES]") || s[0] != '-')
@@ -135,7 +153,7 @@ public class XMLFile
                     }
                 }
                 tagData[count] = temp;
-                tags.Add(pkgtype);
+                tags.Add(rate);
                 count++;
 
             }
@@ -146,7 +164,7 @@ public class XMLFile
         }
     }
 
-    public static void main()
+    public static void Main(String[] args)
     {
 
     }
@@ -154,27 +172,18 @@ public class XMLFile
 }
 
 /*
-string misc = "";
-string qtymethod = "";
-string currency = "";
-string service = "";
-string rateGroup = "<RateGroup Version=\"1\" QtyMethod="+ "\""+qtymethod+"\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">"; 
-string closingTag = "</RateGroup>";
 
-string misc = "";
-string min = "";
-string zone = "";
-string weight = "";
-string pkgtype = "";
-string rateRead = ""; // make sure the ints are toString() so they work in the string
-string rate = "<Rate Zone="+ "\"" + zone+ "\"" + " Weight="+ "\""+weight+ "\" " + "PkgType=" + "\"" + pkgtype+ "\"" + ">" +rateRead+"</Rate>"; 
-string closingTag = "</Rate>";
+
+
+
+
+
+
 
 
 if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
             {
                 rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\"" + ">" + rateRead + "</Rate>";
-
             }
             else if (rate.Contains("misc")){
                 rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>";
@@ -186,25 +195,17 @@ if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
 */
 
 // Arraylist for letters
-asdasd
+//asdasd
 /*
 ArrayList<string> letter = new ArrayList<string>();
 if(s.Contains("[LETTER]")){
    pkgtype="CARRIER_LETTER";
-
-
-
    foreach(item in that letter array){
    letter.add();//adds every other item inside the letter arraylist
-
-
     //DO LATER WHEN STRUCTURE IS READY
    finalfile.add(rate);
    }
-
    }
-
-
   // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
   string[] zonearray = new string[];
   string[] rateValuesUnderScore = new string[]
@@ -238,10 +239,8 @@ if(rateValuesUnderScore[i] != "_"){
     normalvaluecounter++;
 }
 }
-
 int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
 int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
-
 for(int i=0; i < indexRateStart; i++){
 weight = indexRateStart[i];
 zone = indexZoneStart[i];
@@ -258,4 +257,3 @@ arraylist.push(rate);
                 rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "WeightBasis=" + "\"" + weightBasis + "\"" + "AdditionalAmount=" + "\"" + additionalAmount + "\"" + "WeightIncrement=" + "\"" + weightIncrement + "\"" + ">" + rateRead + "</Rate>";
             }
             */
-            
