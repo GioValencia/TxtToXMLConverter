@@ -128,6 +128,7 @@ public class XMLFile
 
                 count++;
 
+                File.AppendAllText(saveLocation, "<RateGroup>" + Environment.NewLine);
             }
             else if (s.Contains("[LETTER]"))
             {
@@ -161,13 +162,13 @@ public class XMLFile
                     {
                         rateRead = nums[i];
                         rate = "<Rate Zone=" + "\"" + zones[i-1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
-                        File.AppendAllText(saveLocation, rate + Environment.NewLine);
+                        File.AppendAllText(saveLocation, "\t" + rate + Environment.NewLine);
                     }
                 }
             }
             else
             {
-                //adds line to list for later
+                File.AppendAllText(saveLocation, "</RateGroup>" + Environment.NewLine);
             }
         }
     }
