@@ -63,12 +63,13 @@ public class XMLFile
         string service = "";
         string min = "";
         string zone = "";
-        List<string> weight = new List<string>();
+        List<string> zones = new List<string>();
+        string weight = "";
         string rateRead = ""; // make sure the ints are toString() so they work in the string
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
         string closingRateGroupTag = "</RateGroup>";
-        string rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
+        string rate;
         string closingRateTag = "</Rate>";
         //Variables
 
@@ -80,7 +81,7 @@ public class XMLFile
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
                 //Adds what you want after the skippable tag
-                string[] words = s.Split(' ');
+                string[] words = s.Split(null);
                 temp = new List<string>();
 
                 foreach (var word in words)
@@ -115,28 +116,15 @@ public class XMLFile
             }
             else if (s.Contains("[ZONES]"))
             {
-                temp = new List<string>();
-                string[] words = s.Split(' ');
-                int underScoreCount = 0;
+                zones = new List<string>();
+                string[] words = s.Split(null);
                 foreach (var word in words)
                 {
-                    if (word != "[ZONES]" && word != "[END]" && word != " ")
+                    if (word != "[ZONES]" && word != " ")
                     {
-                        if (word == "_")
-                        {
-                            underScoreCount++;
-                        }
-                        else
-                        {
-                            temp.Add(word);
-                        }
-                    }
-                    if (word == "[END]")
-                    {
-                        break;
+                        zones.Add(word);
                     }
                 }
-                tagData[count] = temp;
 
                 count++;
 
@@ -162,16 +150,17 @@ public class XMLFile
             {
                 //TIERS sections
             }
-            else if (s.Length >=0 && !(s.Equals("[END]")) && !(s[0].Equals("[ZONES]")) && !(s[0].Equals("[TIERS]")) && !(s[0].Equals("[START]")) && !(s[0].Equals("[LETTER]")) && !(s[0].Equals("[RATEMETHOD]")) && !(s[0].Equals("[CONDITIONAL]")))
+            else if (s.Length >=0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
                 {
                     string[] nums = s.Split(null);
-                    weight.Add(nums[0]);
+                    weight = nums[0];
                     for (int i = 1; i < nums.Length; i++)
                     {
                         rateRead = nums[i];
+                        rate = "<Rate Zone=" + "\"" + zones[i-1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
                         File.AppendAllText(saveLocation, rate + Environment.NewLine);
                     }
                 }
