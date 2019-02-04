@@ -160,9 +160,12 @@ public class XMLFile
                     weight = nums[0];
                     for (int i = 1; i < nums.Length; i++)
                     {
-                        rateRead = nums[i];
-                        rate = "<Rate Zone=" + "\"" + zones[i-1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
-                        File.AppendAllText(saveLocation, "\t" + rate + Environment.NewLine);
+                        if (nums[i] != "_")
+                        {
+                            rateRead = nums[i];
+                            rate = "<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
+                            File.AppendAllText(saveLocation, "\t" + rate + Environment.NewLine);
+                        }
                     }
                 }
             }
@@ -243,22 +246,7 @@ if(s.Contains("[LETTER]")){
 /*
  * // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
  * 
- * 
- string[] zonearray = new string[];
-string[] rateValuesUnderScore = new string[]
-int normalvaluecounter = 0;
-for(int i = 0; i < rateValuesUnderScore.length; i++){
-if(rateValuesUnderScore[i] != "_"){
-    normalvaluecounter++;
-}
-}
-int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
-int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
-for(int i=0; i < indexRateStart; i++){
-weight = indexRateStart[i];
-zone = indexZoneStart[i];
-arraylist.push(rate);
-}
+ *
 */
 
 /*
