@@ -132,19 +132,23 @@ public class XMLFile
             }
             else if (s.Contains("[LETTER]"))
             {
+                //adds space between sections
+                rate += Environment.NewLine;
+                File.AppendAllText(saveLocation, rate);
+                rate = "";
+                weight = "0";
                 pkgtype = "CARRIER_LETTER";
-                temp = new List<string>();
-                string[] words = s.Split(' ');
-                foreach (var word in words)
+                string[] nums = s.Split(null);
+                for (int i = 1; i < nums.Length; i++)
                 {
-                    if (word != "[LETTER]" && word != " ")
+                    if (nums[i] != "_")
                     {
-                        temp.Add(word);
+                        rateRead = nums[i];
+                        //For packages
+                        rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
                     }
                 }
-                tagData[count] = temp;
-
-                count++;
+                File.AppendAllText(saveLocation, rate);
 
             }
             else if (s[0] == '-')
@@ -153,6 +157,9 @@ public class XMLFile
             }
             else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
+                rate += Environment.NewLine;
+                File.AppendAllText(saveLocation, rate);
+                rate = "";
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
                 {
@@ -165,13 +172,10 @@ public class XMLFile
                             rateRead = nums[i];
                             //For packages
                             rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }
-                        if (nums[i].Equals("141.54"))
-                        {
-                            File.AppendAllText(saveLocation, rate);
-                        }
+                        }            
                     }
                 }
+                File.AppendAllText(saveLocation, rate);
             }
             else if (s.Contains("[END]"))
             {
@@ -270,3 +274,26 @@ if(s.Contains("[LETTER]")){
             */
 
 //rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+
+/*
+ * public static void Print2DArray<T>(T[,] matrix)
+    {
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                Console.Write(matrix[i,j] + "\t");
+            }
+            Console.WriteLine();
+        }
+    } 
+*/
+/*
+ * string version = "1";
+   string qtymethod = "";
+   string qtyunits = "";
+   string regionmethod = "Zone";
+   string currency = "EUR";
+   string service = "";
+   string rategroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\"" + "RegionMethod=" + "\"" + regionmethod + "\"" + "Currency=" + "\"" + currency + "\""  + "Service=" + "\"" + service + "\"" + ">";
+*/
