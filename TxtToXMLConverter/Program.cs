@@ -56,6 +56,7 @@ public class XMLFile
         double checkVar;
 
         //Variables
+        string name = "";
         string pkgtype = "";
         string misc = "";
         string qtymethod = "";
@@ -82,19 +83,8 @@ public class XMLFile
             {
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(null);
-                temp = new List<string>();
 
-                foreach (var word in words)
-                {
-                    if (word != "[START]" && word != " ")
-                    {
-                        temp.Add(word);
-                    }
-                }
-
-                tagData[count] = temp;
-
-                count++;
+                name = words[1];
 
             }
             else if (s.Contains("[RATEMETHOD]"))//Stopping point
@@ -179,11 +169,11 @@ public class XMLFile
             }
             else if (s.Contains("[END]"))
             {
-
+                File.AppendAllText(saveLocation, "</RateGroup>" + Environment.NewLine);
             }
             else
             {
-                File.AppendAllText(saveLocation, "</RateGroup>" + Environment.NewLine);
+                
             }
         }
     }
