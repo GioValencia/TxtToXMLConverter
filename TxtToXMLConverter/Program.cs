@@ -69,7 +69,7 @@ public class XMLFile
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
         string closingRateGroupTag = "</RateGroup>";
-        string rate;
+        string rate = "";
         string closingRateTag = "</Rate>";
         //Variables
 
@@ -151,7 +151,7 @@ public class XMLFile
             {
                 //TIERS sections
             }
-            else if (s.Length >=0 && (s[1].Equals('.') || s[2].Equals('.')))
+            else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
@@ -163,11 +163,19 @@ public class XMLFile
                         if (nums[i] != "_")
                         {
                             rateRead = nums[i];
-                            rate = "<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>";
-                            File.AppendAllText(saveLocation, "\t" + rate + Environment.NewLine);
+                            //For packages
+                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                        }
+                        if (nums[i].Equals("141.54"))
+                        {
+                            File.AppendAllText(saveLocation, rate);
                         }
                     }
                 }
+            }
+            else if (s.Contains("[END]"))
+            {
+
             }
             else
             {
@@ -182,6 +190,8 @@ public class XMLFile
         XMLFile test = new XMLFile();
 
         test.splitTags();
+
+        System.Environment.Exit(1);
 
     }
 
@@ -258,3 +268,5 @@ if(s.Contains("[LETTER]")){
                 rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "WeightBasis=" + "\"" + weightBasis + "\"" + "AdditionalAmount=" + "\"" + additionalAmount + "\"" + "WeightIncrement=" + "\"" + weightIncrement + "\"" + ">" + rateRead + "</Rate>";
             }
             */
+
+//rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
