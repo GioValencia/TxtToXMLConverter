@@ -51,47 +51,82 @@ public class XMLFile
     public void splitTags()
     {
         List<string>[] tagData = new List<string>[1000];
-        int count = 0;
+        int lineNum = 0;
         List<string> temp;
         double checkVar;
 
         //Variables
-        string name = "";
         string pkgtype = "";
+        bool conditionalCheck = false;
+        bool validDoc = true;
         string misc = "";
-        string qtymethod = "";
+        string qtymethod = "Combination";
         string currency = "";
-        string service = "";
-        string min = "";
-        string zone = "";
+        string service = "DEFAULT";
+        string version = "1";
+        string qtyunits = "KG";
+        string regionmethod = "Zone";
         List<string> zones = new List<string>();
         string weight = "";
-        string rateRead = ""; // make sure the ints are toString() so they work in the string
+        string rateRead = "";
 
-        string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=\"KG\" " + "RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+        string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
         string closingRateGroupTag = "</RateGroup>";
         string rate = "";
         string closingRateTag = "</Rate>";
         //Variables
 
+        rateGroup += Environment.NewLine + closingRateGroupTag + Environment.NewLine;
+        File.AppendAllText(saveLocation, rateGroup);
 
 
         //reading rates and nothing else
         foreach (string s in txtDoc)
         {
+            lineNum++;
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
+
+                pkgtype = "";
+                validDoc = true;
+                misc = "";
+                qtymethod = "Combination";
+                currency = "";
+                service = "";
+                version = "1";
+                qtyunits = "KG";
+                regionmethod = "Zone";
+                zones = new List<string>();
+                weight = "";
+                rateRead = "";
+                conditionalCheck = false;
+
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(null);
 
-                name = words[1];
-
+                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD"))
+                {
+                    service = words[2];
+                }
+                else
+                {
+                    if (words[2].Equals("XPP_CWT") || words[2].Equals("XPS_CWT") || words[2].Equals("STD_CWT") || words[2].Equals("XSS_CWT") || words[2].Equals("XPD_CWT"))
+                    {
+                        validDoc = false;
+                    }
+                    else {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Invalid service at line: {0}", lineNum);
+                        Console.ResetColor();
+                    }
+                    
+                }
             }
-            else if (s.Contains("[RATEMETHOD]"))//Stopping point
+            else if (s.Contains("[RATEMETHOD]") && validDoc == true)//Stopping point
             {
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
-                // pkgtype = "DISCOUNT";
+                // pkgtype = "DISlineNum";
                 string[] words = s.Split(null);
                 foreach (var word in words)
                 {
@@ -100,11 +135,16 @@ public class XMLFile
                         temp.Add(word);
                     }
                 }
-                tagData[count] = temp;
-
-                count++;
             }
-            else if (s.Contains("[ZONES]"))
+            else if (s.Contains("[CONDITIONAL]") && validDoc == true)
+            {
+                if ((s.Split(null))[1].Equals("DOCUMENTS"))
+                {
+                    misc = "DOCS";
+                }
+                conditionalCheck = true;
+            }
+            else if (s.Contains("[ZONES]") && validDoc == true)
             {
                 zones = new List<string>();
                 string[] words = s.Split(null);
@@ -116,11 +156,15 @@ public class XMLFile
                     }
                 }
 
-                count++;
+                version = "1";
+                qtymethod = "Combination";
+                regionmethod = "Zone";
+                currency = "EUR";
+                rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
 
-                File.AppendAllText(saveLocation, "<RateGroup>" + Environment.NewLine);
+                File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
             }
-            else if (s.Contains("[LETTER]"))
+            else if (s.Contains("[LETTER]") && validDoc == true)
             {
                 //adds space between sections
                 rate += Environment.NewLine;
@@ -141,11 +185,11 @@ public class XMLFile
                 File.AppendAllText(saveLocation, rate);
 
             }
-            else if (s[0] == '-')
+            else if (s[0] == '-' && validDoc == true)
             {
                 //TIERS sections
             }
-            else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
+            else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')) && validDoc == true)
             {
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
@@ -157,19 +201,29 @@ public class XMLFile
                     weight = nums[0];
                     for (int i = 1; i < nums.Length; i++)
                     {
-                        if (nums[i] != "_")
+                        if (nums[i] != "_" && conditionalCheck == false)
                         {
                             rateRead = nums[i];
                             //For packages
                             rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }            
+                        }
+                        else if (nums[i] != "_" && conditionalCheck == true)
+                        {
+                            rateRead = nums[i];
+                            //For packages
+                            rate += "\t<Rate Zone=" + "\"" + zones[i-1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                        }
+                        else
+                        {
+
+                        }
                     }
                 }
                 File.AppendAllText(saveLocation, rate);
             }
-            else if (s.Contains("[END]"))
+            else if (s.Contains("[END]") && validDoc == true)
             {
-                File.AppendAllText(saveLocation, "</RateGroup>" + Environment.NewLine);
+                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
             }
             else
             {
@@ -184,6 +238,8 @@ public class XMLFile
         XMLFile test = new XMLFile();
 
         test.splitTags();
+
+       // Console.ReadLine();
 
         System.Environment.Exit(1);
 
@@ -229,15 +285,15 @@ if(s.Contains("[LETTER]")){
   // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
   string[] zonearray = new string[];
   string[] rateValuesUnderScore = new string[]
-  int normalvaluecounter = 0;
+  int normalvaluelineNumer = 0;
   for(int i = 0; i < rateValuesUnderScore.length; i++){
   if(rateValuesUnderScore[i] != "_"){
-        normalvaluecounter++;
+        normalvaluelineNumer++;
     }
   }
   
-  int indexRateStart = rateValuesUnderscore.length - normalvaluecounter; // maybe +1 or -1
-  int indexZoneStart = zonearray.length - normalvaluecounter; //maybe +1 or -1
+  int indexRateStart = rateValuesUnderscore.length - normalvaluelineNumer; // maybe +1 or -1
+  int indexZoneStart = zonearray.length - normalvaluelineNumer; //maybe +1 or -1
   
   for(int i=0; i < indexRateStart; i++){
   weight = indexRateStart[i];
