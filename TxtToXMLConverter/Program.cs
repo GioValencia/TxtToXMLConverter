@@ -25,7 +25,7 @@ public class XMLFile
     public XMLFile(/*ReadFile file*/)
     {
         //saveLocation = Path.Combine(file.filePath, "_TXTinXMLFormat.txt");
-        txtDoc = File.ReadAllLines(@"C:\Users\GiovanniValencia\Desktop\GSAApp\EXP.txt");
+        txtDoc = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + "EXP.txt");
     }
 
     //Saves XML file at location specified, currently set to Desktop by default
