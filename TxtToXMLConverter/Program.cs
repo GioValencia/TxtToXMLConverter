@@ -17,6 +17,7 @@ public class ReadFile
 
 public class XMLFile
 {
+
     //change filename to dynamic
     private string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
@@ -64,18 +65,31 @@ public class XMLFile
         string currency = "";
         string service = "DEFAULT";
         string version = "1";
-        string qtyunits = "KG";
+        string qtyunits = "";
         string regionmethod = "Zone";
         List<string> zones = new List<string>();
         string weight = "";
         string rateRead = "";
+        //Chart
+        string type = "Rate";
+        string start = DateTime.Now.ToString("yyyyMMdd");
+        DateTime enddate = DateTime.Today.AddYears(+100);
+        string end = enddate.ToString("yyyyMMdd");
+        string origin = "";
+        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + start + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">";
+        string closingchart = "</Chart>";
+
+        //Chart
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
         string closingRateGroupTag = "</RateGroup>";
         string rate = "";
         string closingRateTag = "</Rate>";
+
         //Variables
 
+
+        File.AppendAllText(saveLocation, chart + Environment.NewLine);
         rateGroup += Environment.NewLine + closingRateGroupTag + Environment.NewLine;
         File.AppendAllText(saveLocation, rateGroup);
 
@@ -94,7 +108,7 @@ public class XMLFile
                 currency = "";
                 service = "";
                 version = "1";
-                qtyunits = "KG";
+                qtyunits = "";
                 regionmethod = "Zone";
                 zones = new List<string>();
                 weight = "";
@@ -104,22 +118,24 @@ public class XMLFile
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(null);
 
-                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD"))
+                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY"))
                 {
+
                     service = words[2];
                 }
                 else
                 {
-                    if (words[2].Equals("XPP_CWT") || words[2].Equals("XPS_CWT") || words[2].Equals("STD_CWT") || words[2].Equals("XSS_CWT") || words[2].Equals("XPD_CWT"))
+                    if (words[2].Equals("XPP_CWT") || words[2].Equals("XPS_CWT") || words[2].Equals("STD_CWT") || words[2].Equals("XSS_CWT") || words[2].Equals("XPD_CWT") || words[2].Contains("_CWT"))
                     {
                         validDoc = false;
                     }
-                    else {
+                    else
+                    {
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("Invalid service at line: {0}", lineNum);
                         Console.ResetColor();
                     }
-                    
+
                 }
             }
             else if (s.Contains("[RATEMETHOD]") && validDoc == true)//Stopping point
@@ -148,11 +164,20 @@ public class XMLFile
             {
                 zones = new List<string>();
                 string[] words = s.Split(null);
+
+
                 foreach (var word in words)
                 {
+                    int index = word.IndexOf("-");
                     if (word != "[ZONES]" && word != " ")
                     {
-                        zones.Add(word);
+                        //to turn it back to zones with DOM and INTL and country code just comment out wordzone, index and replace zones.add with word
+
+                        string wordzone = "";
+                        wordzone = word.Substring(0, index);
+                        zones.Add(wordzone);
+
+
                     }
                 }
 
@@ -160,12 +185,32 @@ public class XMLFile
                 qtymethod = "Combination";
                 regionmethod = "Zone";
                 currency = "EUR";
-                rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+                if (service.Equals("XPP") || service.Equals("XPS") || service.Equals("STD") || service.Equals("XSS") || service.Equals("XPD"))
+                {
+                    qtyunits = "KG";
+                    rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+                }
+                else
+                {
+                    qtyunits = "LB";
+                    rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+                }
+
 
                 File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
             }
             else if (s.Contains("[LETTER]") && validDoc == true)
             {
+
+                int bracketIndex = s.IndexOf("]") + 1;
+                int bracketSpace = s.IndexOf(" ");
+                if (bracketIndex != bracketSpace)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Need a space after [LETTER] at line: {0}", lineNum);
+                    Console.ResetColor();
+                }
+
                 //adds space between sections
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
@@ -211,7 +256,7 @@ public class XMLFile
                         {
                             rateRead = nums[i];
                             //For packages
-                            rate += "\t<Rate Zone=" + "\"" + zones[i-1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
                         }
                         else
                         {
@@ -227,19 +272,22 @@ public class XMLFile
             }
             else
             {
-                
+
             }
         }
+
+        File.AppendAllText(saveLocation, closingchart + Environment.NewLine);
     }
 
     public static void Main(String[] args)
     {
 
+
         XMLFile test = new XMLFile();
 
         test.splitTags();
-
-       // Console.ReadLine();
+        Console.WriteLine("Press any key to exit");
+        Console.ReadLine();
 
         System.Environment.Exit(1);
 
@@ -343,3 +391,5 @@ if(s.Contains("[LETTER]")){
    string service = "";
    string rategroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\"" + "RegionMethod=" + "\"" + regionmethod + "\"" + "Currency=" + "\"" + currency + "\""  + "Service=" + "\"" + service + "\"" + ">";
 */
+
+
