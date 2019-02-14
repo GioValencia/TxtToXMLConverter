@@ -59,6 +59,7 @@ public class XMLFile
         //Variables
         string pkgtype = "";
         bool conditionalCheck = false;
+        bool ratetypeCheck = false;
         bool validDoc = true;
         string misc = "";
         string qtymethod = "Combination";
@@ -151,6 +152,26 @@ public class XMLFile
                         temp.Add(word);
                     }
                 }
+            }
+            else if (s.Contains("[RATETYPE]") && validDoc == true)
+            {
+                if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
+                {
+                    misc = "SINGLE";
+
+                }
+                else if ((s.Split(null))[1].Equals("MULTI_PIECE"))
+                {
+                    misc = "MULTI";
+
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("[RATETYPE] needs value SINGLE_PIECE OR MULTIPIECE at line: {0}", lineNum);
+                    Console.ResetColor();
+                }
+                conditionalCheck = true;
             }
             else if (s.Contains("[CONDITIONAL]") && validDoc == true)
             {
@@ -303,7 +324,7 @@ public class XMLFile
 
 
 
-
+     
 
 if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
             {
