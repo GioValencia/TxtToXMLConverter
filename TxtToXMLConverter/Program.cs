@@ -260,29 +260,39 @@ public class XMLFile
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
                 rate = "";
+                int i = 0;
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
                 {
-                    string[] nums = s.Split(null);
-                    weight = nums[0];
-                    for (int i = 1; i < nums.Length; i++)
+                    try
                     {
-                        if (nums[i] != "_" && conditionalCheck == false)
+                        string[] nums = s.Split(null);
+                        weight = nums[0];
+                        for (i = 1; i < nums.Length; i++)
                         {
-                            rateRead = nums[i];
-                            //For packages
-                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }
-                        else if (nums[i] != "_" && conditionalCheck == true)
-                        {
-                            rateRead = nums[i];
-                            //For packages
-                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }
-                        else
-                        {
+                            if (nums[i] != "_" && conditionalCheck == false)
+                            {
+                                rateRead = nums[i];
+                                //For packages
+                                rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                            }
+                            else if (nums[i] != "_" && conditionalCheck == true)
+                            {
+                                rateRead = nums[i];
+                                //For packages
+                                rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                            }
+                            else
+                            {
 
+                            }
                         }
+                    }
+                    catch (System.ArgumentOutOfRangeException e)
+                    {
+
+                        //System.Console.WriteLine(e.Message);
+                        throw new System.ArgumentOutOfRangeException(Environment.NewLine + "Number of zones does not match number of rates in row " + lineNum + Environment.NewLine, e);
                     }
                 }
                 File.AppendAllText(saveLocation, rate);
