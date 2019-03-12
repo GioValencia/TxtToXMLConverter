@@ -17,7 +17,7 @@ public class ReadFile
 
 public class XMLFile
 {
-
+    
     //change filename to dynamic
     private string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
@@ -79,7 +79,7 @@ public class XMLFile
         string origin = "";
         string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + start + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">";
         string closingchart = "</Chart>";
-
+        
         //Chart
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
@@ -119,7 +119,7 @@ public class XMLFile
                 //Adds what you want after the skippable tag
                 string[] words = s.Split(null);
 
-                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY"))
+                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF"))
                 {
 
                     service = words[2];
@@ -158,12 +158,12 @@ public class XMLFile
                 if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
                 {
                     misc = "SINGLE";
-
+                    
                 }
                 else if ((s.Split(null))[1].Equals("MULTI_PIECE"))
                 {
                     misc = "MULTI";
-
+                    
                 }
                 else
                 {
@@ -186,19 +186,19 @@ public class XMLFile
                 zones = new List<string>();
                 string[] words = s.Split(null);
 
-
+               
                 foreach (var word in words)
                 {
                     int index = word.IndexOf("-");
                     if (word != "[ZONES]" && word != " ")
                     {
                         //to turn it back to zones with DOM and INTL and country code just comment out wordzone, index and replace zones.add with word
-
+                       
                         string wordzone = "";
                         wordzone = word.Substring(0, index);
                         zones.Add(wordzone);
-
-
+                        
+                       
                     }
                 }
 
@@ -211,19 +211,18 @@ public class XMLFile
                     qtyunits = "KG";
                     rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
                 }
-                else
-                {
+                else {
                     qtyunits = "LB";
                     rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
                 }
-
+               
 
                 File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
             }
             else if (s.Contains("[LETTER]") && validDoc == true)
             {
 
-                int bracketIndex = s.IndexOf("]") + 1;
+                int bracketIndex = s.IndexOf("]")+1;
                 int bracketSpace = s.IndexOf(" ");
                 if (bracketIndex != bracketSpace)
                 {
@@ -231,7 +230,7 @@ public class XMLFile
                     Console.WriteLine("Need a space after [LETTER] at line: {0}", lineNum);
                     Console.ResetColor();
                 }
-
+                
                 //adds space between sections
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
@@ -260,39 +259,29 @@ public class XMLFile
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
                 rate = "";
-                int i = 0;
                 //Length cannot be less than 0 RUNTIME error
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
                 {
-                    try
+                    string[] nums = s.Split(null);
+                    weight = nums[0];
+                    for (int i = 1; i < nums.Length; i++)
                     {
-                        string[] nums = s.Split(null);
-                        weight = nums[0];
-                        for (i = 1; i < nums.Length; i++)
+                        if (nums[i] != "_" && conditionalCheck == false)
                         {
-                            if (nums[i] != "_" && conditionalCheck == false)
-                            {
-                                rateRead = nums[i];
-                                //For packages
-                                rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                            }
-                            else if (nums[i] != "_" && conditionalCheck == true)
-                            {
-                                rateRead = nums[i];
-                                //For packages
-                                rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                            }
-                            else
-                            {
-
-                            }
+                            rateRead = nums[i];
+                            //For packages
+                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
                         }
-                    }
-                    catch (System.ArgumentOutOfRangeException e)
-                    {
+                        else if (nums[i] != "_" && conditionalCheck == true)
+                        {
+                            rateRead = nums[i];
+                            //For packages
+                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                        }                   
+                        else
+                        {
 
-                        //System.Console.WriteLine(e.Message);
-                        throw new System.ArgumentOutOfRangeException(Environment.NewLine + "Number of zones does not match number of rates in row " + lineNum + Environment.NewLine, e);
+                        }
                     }
                 }
                 File.AppendAllText(saveLocation, rate);
@@ -312,14 +301,14 @@ public class XMLFile
 
     public static void Main(String[] args)
     {
-
-
+       
+        
         XMLFile test = new XMLFile();
-
+      
         test.splitTags();
         Console.WriteLine("Press any key to exit");
         Console.ReadLine();
-
+        
         System.Environment.Exit(1);
 
     }
@@ -401,17 +390,17 @@ if(s.Contains("[LETTER]")){
 //rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
 
 /*
- * public static void Print2DArray<T>(T[,] matrix)
-    {
-        for (int i = 0; i < matrix.GetLength(0); i++)
-        {
-            for (int j = 0; j < matrix.GetLength(1); j++)
-            {
-                Console.Write(matrix[i,j] + "\t");
-            }
-            Console.WriteLine();
-        }
-    } 
+ * publicÂ staticÂ voidÂ Print2DArray<T>(T[,]Â matrix)
+Â Â Â Â {
+Â Â Â Â Â Â Â Â forÂ (intÂ iÂ =Â 0;Â iÂ <Â matrix.GetLength(0);Â i++)
+Â Â Â Â Â Â Â Â {
+Â Â Â Â Â Â Â Â Â Â Â Â forÂ (intÂ jÂ =Â 0;Â jÂ <Â matrix.GetLength(1);Â j++)
+Â Â Â Â Â Â Â Â Â Â Â Â {
+Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Â Console.Write(matrix[i,j]Â +Â "\t");
+Â Â Â Â Â Â Â Â Â Â Â Â }
+Â Â Â Â Â Â Â Â Â Â Â Â Console.WriteLine();
+Â Â Â Â Â Â Â Â }
+Â Â Â Â } 
 */
 /*
  * string version = "1";
