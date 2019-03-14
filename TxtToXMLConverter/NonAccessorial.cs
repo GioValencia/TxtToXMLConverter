@@ -58,6 +58,7 @@ public class XMLFile
 
         //Variables
         string pkgtype = "";
+        string[] CWTLine = new string[1];
         bool conditionalCheck = false;
         bool ratetypeCheck = false;
         bool validDoc = true;
@@ -99,6 +100,7 @@ public class XMLFile
         foreach (string s in txtDoc)
         {
             lineNum++;
+            string[] words = s.Split(null);
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
 
@@ -117,43 +119,39 @@ public class XMLFile
                 conditionalCheck = false;
 
                 //Adds what you want after the skippable tag
-                string[] words = s.Split(null);
 
-                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF"))
+                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF") || words[2].Contains("_CWT"))
                 {
-
                     service = words[2];
                 }
                 else
                 {
-                    if (words[2].Equals("XPP_CWT") || words[2].Equals("XPS_CWT") || words[2].Equals("STD_CWT") || words[2].Equals("XSS_CWT") || words[2].Equals("XPD_CWT") || words[2].Contains("_CWT"))
-                    {
-                        validDoc = false;
-                      
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("Invalid service at line: {0}", lineNum);
-                        Console.ResetColor();
-                    }
-
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Invalid service at line: {0}", lineNum);
+                    Console.ResetColor();
                 }
             }
-            else if (s[0] == '-' && validDoc == true)// it appears if set to false
+            else if (words[0].Equals("-"))// CWT related files access here
             {
-               // TIERS sections
-              //   string weightbasis = "";
-                // string additionalamount = "";
-                //   rate += "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + " AdditionalAmount=" + "\"" + additionalamount + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                for (int z = 1; z < words.Length; z++)
+                {
+                    if (!s[z].Equals("-") && !s[z].Equals(" "))
+                    {
+                        rate = "\t<Rate Zone=" + "\"" + zones[z-1] + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + CWTLine[0] + "\"" + " AdditionalAmount=" + "\"" + words[z] + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + CWTLine[z] + "</Rate>" + Environment.NewLine;
+                        File.AppendAllText(saveLocation, rate);
+                    }
+                }
 
+                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
             }
-            else if (s.Contains("[RATEMETHOD]") && validDoc == true)//Stopping point
+            else if (s.Contains("[TIER]"))
+            {
+                //ADD later once we get a definition of what to include
+            }
+            else if (s.Contains("[RATEMETHOD]"))//Stopping point
             {
                 //Adds what you want after the skippable tag
                 temp = new List<string>();
-                // pkgtype = "DISlineNum";
-                string[] words = s.Split(null);
                 foreach (var word in words)
                 {
                     if (word != "[RATEMETHOD]" && word != " ")
@@ -162,7 +160,7 @@ public class XMLFile
                     }
                 }
             }
-            else if (s.Contains("[RATETYPE]") && validDoc == true)
+            else if (s.Contains("[RATETYPE]"))
             {
                 if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
                 {
@@ -182,7 +180,7 @@ public class XMLFile
                 }
                 conditionalCheck = true;
             }
-            else if (s.Contains("[CONDITIONAL]") && validDoc == true)
+            else if (s.Contains("[CONDITIONAL]"))
             {
                 if ((s.Split(null))[1].Equals("DOCUMENTS"))
                 {
@@ -190,11 +188,9 @@ public class XMLFile
                 }
                 conditionalCheck = true;
             }
-            else if (s.Contains("[ZONES]") && validDoc == true)
+            else if (s.Contains("[ZONES]"))
             {
                 zones = new List<string>();
-                string[] words = s.Split(null);
-
                
                 foreach (var word in words)
                 {
@@ -224,11 +220,13 @@ public class XMLFile
                     qtyunits = "LB";
                     rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
                 }
-               
 
-                File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
+                if (!service.Contains("_CWT"))
+                {
+                    File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
+                }
             }
-            else if (s.Contains("[LETTER]") && validDoc == true)
+            else if (s.Contains("[LETTER]"))
             {
 
                 int bracketIndex = s.IndexOf("]")+1;
@@ -259,34 +257,11 @@ public class XMLFile
                 File.AppendAllText(saveLocation, rate);
 
             }
-            else if (s.Contains("[END]") && validDoc == true)
+            else if (s.Contains("[END]"))
             {
-                /*
-                string[] wordsCWT = s.Split(null);
-                if (s.Contains("[START]")){
-
-                    string weightbasis = "";
-                    string additionalamount = "";
-                   // rate = "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + "AdditionalAmount=" + "\"" + additionalamount + "\"" + "WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-
-                    if (wordsCWT[2].Contains("_CWT"))
-                    {
-                        if (wordsCWT[1].Contains("-"))
-                        {
-                            for (int i = 1; i < wordsCWT.Length; i++)
-                            {
-                                additionalamount = wordsCWT[i];
-                                rate += "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + "AdditionalAmount=" + "\"" + additionalamount + "\"" + "WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-
-                            }
-                            File.AppendAllText(saveLocation, rate + Environment.NewLine);
-                        }
-                    }
-                }
-                */
-                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
+                File.AppendAllText(saveLocation, Environment.NewLine);
             }
-            else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')) && validDoc == true)
+            else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
                 rate = Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
@@ -295,6 +270,7 @@ public class XMLFile
                 if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
                 {
                     string[] nums = s.Split(null);
+                    CWTLine = nums;
                     weight = nums[0];
                     for (int i = 1; i < nums.Length; i++)
                     {
