@@ -58,6 +58,10 @@ public class XMLFile
 
         //Variables
         string pkgtype = "";
+        string groupCarrier = "";
+        string code = "";
+        string chartName = "";
+        string origin = "";
         string[] CWTLine = new string[1];
         bool conditionalCheck = false;
         bool ratetypeCheck = false;
@@ -77,10 +81,17 @@ public class XMLFile
         string start = DateTime.Now.ToString("yyyyMMdd");
         DateTime enddate = DateTime.Today.AddYears(+100);
         string end = enddate.ToString("yyyyMMdd");
-        string origin = "";
-        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + start + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
+        string userStart = "";
+        string userEnd = "";
+        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
         string closingchart = "</Chart>";
-        
+
+        File.AppendAllText(saveLocation, "<PBChardLoader>" + Environment.NewLine + chart + Environment.NewLine);
+
+        string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
+
+        File.AppendAllText(saveLocation, Environment.NewLine);
+
         //Chart
 
         string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
@@ -91,8 +102,7 @@ public class XMLFile
         //Variables
 
 
-        File.AppendAllText(saveLocation, chart + Environment.NewLine);
-        rateGroup += Environment.NewLine + closingRateGroupTag + Environment.NewLine;
+        rateGroup += closingRateGroupTag + Environment.NewLine;
         File.AppendAllText(saveLocation, rateGroup);
 
 
@@ -300,7 +310,7 @@ public class XMLFile
             }
         }
 
-        File.AppendAllText(saveLocation, closingchart + Environment.NewLine);
+        File.AppendAllText(saveLocation, closingchart + Environment.NewLine + "</PBChardLoader>");
     }
 
     public static void Main(String[] args)
