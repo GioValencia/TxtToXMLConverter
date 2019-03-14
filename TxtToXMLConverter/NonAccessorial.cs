@@ -77,7 +77,7 @@ public class XMLFile
         DateTime enddate = DateTime.Today.AddYears(+100);
         string end = enddate.ToString("yyyyMMdd");
         string origin = "";
-        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + start + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">";
+        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + start + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
         string closingchart = "</Chart>";
         
         //Chart
@@ -129,6 +129,7 @@ public class XMLFile
                     if (words[2].Equals("XPP_CWT") || words[2].Equals("XPS_CWT") || words[2].Equals("STD_CWT") || words[2].Equals("XSS_CWT") || words[2].Equals("XPD_CWT") || words[2].Contains("_CWT"))
                     {
                         validDoc = false;
+                      
                     }
                     else
                     {
@@ -138,6 +139,14 @@ public class XMLFile
                     }
 
                 }
+            }
+            else if (s[0] == '-' && validDoc == true)// it appears if set to false
+            {
+               // TIERS sections
+              //   string weightbasis = "";
+                // string additionalamount = "";
+                //   rate += "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + " AdditionalAmount=" + "\"" + additionalamount + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+
             }
             else if (s.Contains("[RATEMETHOD]") && validDoc == true)//Stopping point
             {
@@ -250,13 +259,36 @@ public class XMLFile
                 File.AppendAllText(saveLocation, rate);
 
             }
-            else if (s[0] == '-' && validDoc == true)
+            else if (s.Contains("[END]") && validDoc == true)
             {
-                //TIERS sections
+                /*
+                string[] wordsCWT = s.Split(null);
+                if (s.Contains("[START]")){
+
+                    string weightbasis = "";
+                    string additionalamount = "";
+                   // rate = "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + "AdditionalAmount=" + "\"" + additionalamount + "\"" + "WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+
+                    if (wordsCWT[2].Contains("_CWT"))
+                    {
+                        if (wordsCWT[1].Contains("-"))
+                        {
+                            for (int i = 1; i < wordsCWT.Length; i++)
+                            {
+                                additionalamount = wordsCWT[i];
+                                rate += "\t<Rate Zone=" + "\"" + zones + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + weightbasis + "\"" + "AdditionalAmount=" + "\"" + additionalamount + "\"" + "WeightIncrement=" + "\"" + "1" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+
+                            }
+                            File.AppendAllText(saveLocation, rate + Environment.NewLine);
+                        }
+                    }
+                }
+                */
+                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
             }
             else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')) && validDoc == true)
             {
-                rate += Environment.NewLine;
+                rate = Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
                 rate = "";
                 //Length cannot be less than 0 RUNTIME error
@@ -283,12 +315,8 @@ public class XMLFile
 
                         }
                     }
+                    File.AppendAllText(saveLocation, rate);
                 }
-                File.AppendAllText(saveLocation, rate);
-            }
-            else if (s.Contains("[END]") && validDoc == true)
-            {
-                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
             }
             else
             {
