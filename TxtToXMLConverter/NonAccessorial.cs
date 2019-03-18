@@ -17,11 +17,67 @@ public class ReadFile
 
 public class XMLFile
 {
-    
+
+
     //change filename to dynamic
     private string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
     private string[] XMLArr;
+    List<string>[] tagData = new List<string>[1000];
+    int lineNum = 0;
+    List<string> temp;
+    double checkVar;
+    string[] words = new string[0];
+
+    //Variables
+    string pkgtype = "";
+    string groupCarrier = "";
+    string code = "";
+    string chartName = "";
+    string origin = "";
+    string[] CWTLine = new string[1];
+    bool conditionalCheck = false;
+    bool ratetypeCheck = false;
+    string misc = "";
+    string qtymethod = "Combination";
+    string currency = "";
+    string service = "DEFAULT";
+    string version = "1";
+    string qtyunits = "";
+    string regionmethod = "Zone";
+    List<string> zones = new List<string>();
+    string weight = "";
+    string rateRead = "";
+    bool extFile = false; //External files for Single and Multi refer to this
+    string[] extFilesSingle = new string[0]; //External files are populated here
+    string[] extFilesMulti = new string[0];
+    string prevService = "";
+    //Chart
+    string type = "Rate";
+    string start = DateTime.Now.ToString("yyyyMMdd");
+    string end = DateTime.Today.AddYears(+100).ToString("yyyyMMdd");
+    string userStart = "";
+    string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
+    string closingchart = "</Chart>";
+
+    File.AppendAllText(saveLocation, "<PBChardLoader>" + Environment.NewLine + chart + Environment.NewLine);
+
+        string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
+
+    File.AppendAllText(saveLocation, Environment.NewLine);
+
+        //Chart
+
+    string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+    string closingRateGroupTag = "</RateGroup>";
+    string rate = "";
+    string closingRateTag = "</Rate>";
+
+    //Variables
+
+
+    rateGroup += closingRateGroupTag + Environment.NewLine;
+    File.AppendAllText(saveLocation, rateGroup);
 
     public XMLFile(/*ReadFile file*/)
     {
@@ -49,73 +105,57 @@ public class XMLFile
         saveXML(XMLArr);
     }
 
+    private void zonesFun()
+    {
+        zones = new List<string>();
+
+        foreach (var word in words)
+        {
+            int index = word.IndexOf("-");
+            if (word != "[ZONES]" && word != " ")
+            {
+                //to turn it back to zones with DOM and INTL and country code just comment out wordzone, index and replace zones.add with word
+
+                string wordzone = "";
+                wordzone = word.Substring(0, index);
+                zones.Add(wordzone);
+
+
+            }
+        }
+
+        version = "1";
+        qtymethod = "Combination";
+        regionmethod = "Zone";
+        currency = "EUR";
+        if (service.Equals("XPP") || service.Equals("XPS") || service.Equals("STD") || service.Equals("XSS") || service.Equals("XPD"))
+        {
+            qtyunits = "KG";
+            rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+        }
+        else
+        {
+            qtyunits = "LB";
+            rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+        }
+
+        if (!service.Contains("_CWT"))
+        {
+            File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
+        }
+    }
+
     public void splitTags()
     {
-        List<string>[] tagData = new List<string>[1000];
-        int lineNum = 0;
-        List<string> temp;
-        double checkVar;
-
-        //Variables
-        string pkgtype = "";
-        string groupCarrier = "";
-        string code = "";
-        string chartName = "";
-        string origin = "";
-        string[] CWTLine = new string[1];
-        bool conditionalCheck = false;
-        bool ratetypeCheck = false;
-        bool validDoc = true;
-        string misc = "";
-        string qtymethod = "Combination";
-        string currency = "";
-        string service = "DEFAULT";
-        string version = "1";
-        string qtyunits = "";
-        string regionmethod = "Zone";
-        List<string> zones = new List<string>();
-        string weight = "";
-        string rateRead = "";
-        //Chart
-        string type = "Rate";
-        string start = DateTime.Now.ToString("yyyyMMdd");
-        DateTime enddate = DateTime.Today.AddYears(+100);
-        string end = enddate.ToString("yyyyMMdd");
-        string userStart = "";
-        string userEnd = "";
-        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
-        string closingchart = "</Chart>";
-
-        File.AppendAllText(saveLocation, "<PBChardLoader>" + Environment.NewLine + chart + Environment.NewLine);
-
-        string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
-
-        File.AppendAllText(saveLocation, Environment.NewLine);
-
-        //Chart
-
-        string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
-        string closingRateGroupTag = "</RateGroup>";
-        string rate = "";
-        string closingRateTag = "</Rate>";
-
-        //Variables
-
-
-        rateGroup += closingRateGroupTag + Environment.NewLine;
-        File.AppendAllText(saveLocation, rateGroup);
-
-
         //reading rates and nothing else
         foreach (string s in txtDoc)
         {
             lineNum++;
-            string[] words = s.Split(null);
+            words = s.Split(null);
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
 
                 pkgtype = "";
-                validDoc = true;
                 misc = "";
                 qtymethod = "Combination";
                 currency = "";
@@ -127,12 +167,34 @@ public class XMLFile
                 weight = "";
                 rateRead = "";
                 conditionalCheck = false;
+                extFile = false;
+                extFilesSingle = new string[1];
+                extFilesMulti = new string[1];
 
                 //Adds what you want after the skippable tag
 
                 if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF") || words[2].Contains("_CWT"))
                 {
-                    service = words[2];
+
+                    if (!words[2].Equals(prevService))
+                    {
+                        service = words[2];
+                        prevService = service;
+                    }
+
+                    extFilesSingle = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_SINGLE.txt", SearchOption.TopDirectoryOnly);
+
+                    if (extFilesSingle.Length > 0)
+                    {
+                        extFile = true;
+                    }
+
+                    extFilesMulti = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_MULTI.txt", SearchOption.TopDirectoryOnly);
+
+                    if (extFilesMulti.Length > 0)
+                    {
+                        extFile = true;
+                    }
                 }
                 else
                 {
@@ -200,41 +262,7 @@ public class XMLFile
             }
             else if (s.Contains("[ZONES]"))
             {
-                zones = new List<string>();
-               
-                foreach (var word in words)
-                {
-                    int index = word.IndexOf("-");
-                    if (word != "[ZONES]" && word != " ")
-                    {
-                        //to turn it back to zones with DOM and INTL and country code just comment out wordzone, index and replace zones.add with word
-                       
-                        string wordzone = "";
-                        wordzone = word.Substring(0, index);
-                        zones.Add(wordzone);
-                        
-                       
-                    }
-                }
-
-                version = "1";
-                qtymethod = "Combination";
-                regionmethod = "Zone";
-                currency = "EUR";
-                if (service.Equals("XPP") || service.Equals("XPS") || service.Equals("STD") || service.Equals("XSS") || service.Equals("XPD"))
-                {
-                    qtyunits = "KG";
-                    rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
-                }
-                else {
-                    qtyunits = "LB";
-                    rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
-                }
-
-                if (!service.Contains("_CWT"))
-                {
-                    File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
-                }
+                zonesFun();
             }
             else if (s.Contains("[LETTER]"))
             {
@@ -328,102 +356,3 @@ public class XMLFile
     }
 
 }
-
-/*
-
-
-
-
-
-
-
-     
-
-if (line of text file contains[CONDITIONAL] DOCUMENTS the next line after that)
-            {
-                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\"" + ">" + rateRead + "</Rate>";
-            }
-            else if (rate.Contains("misc")){
-                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>";
-            }
-            else
-            {
-                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "Min=" + "\"" + min + "\"" + ">" + rateRead + "</Rate>";
-            }
-*/
-
-// Arraylist for letters
-//asdasd
-/*
-ArrayList<string> letter = new ArrayList<string>();
-if(s.Contains("[LETTER]")){
-   pkgtype="CARRIER_LETTER";
-   foreach(item in that letter array){
-   letter.add();//adds every other item inside the letter arraylist
-    //DO LATER WHEN STRUCTURE IS READY
-   finalfile.add(rate);
-   }
-   }
-  // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
-  string[] zonearray = new string[];
-  string[] rateValuesUnderScore = new string[]
-  int normalvaluelineNumer = 0;
-  for(int i = 0; i < rateValuesUnderScore.length; i++){
-  if(rateValuesUnderScore[i] != "_"){
-        normalvaluelineNumer++;
-    }
-  }
-  
-  int indexRateStart = rateValuesUnderscore.length - normalvaluelineNumer; // maybe +1 or -1
-  int indexZoneStart = zonearray.length - normalvaluelineNumer; //maybe +1 or -1
-  
-  for(int i=0; i < indexRateStart; i++){
-  weight = indexRateStart[i];
-  zone = indexZoneStart[i];
-  arraylist.push(rate);
-  }
-    
-   */
-
-/*
- * // This is a possible solution for the rate values that have the "_" as a value but we still need to line them up with zones.
- * 
- *
-*/
-
-/*
-            string weightBasis = "";
-            string additionalAmount = "";
-            string weightIncrement = "";
-            string rateRead = additionalAmount * weightBasis;// parse into a double and then back into a toString for the rates
-            if ([TIER]) {
-                rate = "<Rate Zone=" + "\"" + zone + "\"" + " Weight=" + "\"" + weight + "\" " + "WeightBasis=" + "\"" + weightBasis + "\"" + "AdditionalAmount=" + "\"" + additionalAmount + "\"" + "WeightIncrement=" + "\"" + weightIncrement + "\"" + ">" + rateRead + "</Rate>";
-            }
-            */
-
-//rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-
-/*
- * public static void Print2DArray<T>(T[,] matrix)
-    {
-        for (int i = 0; i < matrix.GetLength(0); i++)
-        {
-            for (int j = 0; j < matrix.GetLength(1); j++)
-            {
-                Console.Write(matrix[i,j] + "\t");
-            }
-            Console.WriteLine();
-        }
-    } 
-*/
-/*
- * string version = "1";
-   string qtymethod = "";
-   string qtyunits = "";
-   string regionmethod = "Zone";
-   string currency = "EUR";
-   string service = "";
-   string rategroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\"" + "RegionMethod=" + "\"" + regionmethod + "\"" + "Currency=" + "\"" + currency + "\""  + "Service=" + "\"" + service + "\"" + ">";
-*/
-
-
