@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 public class ReadFile
 {
@@ -20,7 +21,7 @@ public class XMLFile
 
 
     //change filename to dynamic
-    private string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
+     static string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
     private string[] XMLArr;
     List<string>[] tagData = new List<string>[1000];
@@ -31,19 +32,22 @@ public class XMLFile
 
     //Variables
     string pkgtype = "";
-    string groupCarrier = "";
-    string code = "";
-    string chartName = "";
-    string origin = "";
+    //CW
+    static string type = Console.ReadLine();
+    static string groupCarrier = "";
+    static string code = "";
+    static string chartName = "";
+    //CW
+    static string origin = Console.ReadLine();
     string[] CWTLine = new string[1];
     bool conditionalCheck = false;
     bool ratetypeCheck = false;
     string misc = "";
-    string qtymethod = "Combination";
-    string currency = "";
-    string service = "DEFAULT";
+    static string qtymethod = "Combination";
+    static string currency = "";
+    static string service = "DEFAULT";
     string version = "1";
-    string qtyunits = "";
+    static string qtyunits = "";
     string regionmethod = "Zone";
     List<string> zones = new List<string>();
     string weight = "";
@@ -53,14 +57,15 @@ public class XMLFile
     string[] extFilesMulti = new string[0];
     string prevService = "";
     //Chart
-    string type = "Rate";
+   
     string start = DateTime.Now.ToString("yyyyMMdd");
-    string end = DateTime.Today.AddYears(+100).ToString("yyyyMMdd");
-    string userStart = "";
-    string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
-    string closingchart = "</Chart>";
+    static string end = DateTime.Today.AddYears(+100).ToString("yyyyMMdd");
+    //CW
+    static string userStart = Console.ReadLine();
+    static string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
+    static string closingchart = "</Chart>";
 
-    File.AppendAllText(saveLocation, "<PBChardLoader>" + Environment.NewLine + chart + Environment.NewLine);
+File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart + Environment.NewLine);
 
         string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
 
@@ -68,7 +73,7 @@ public class XMLFile
 
         //Chart
 
-    string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+    static string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
     string closingRateGroupTag = "</RateGroup>";
     string rate = "";
     string closingRateTag = "</Rate>";
@@ -209,7 +214,7 @@ public class XMLFile
                 {
                     if (!s[z].Equals("-") && !s[z].Equals(" "))
                     {
-                        rate = "\t<Rate Zone=" + "\"" + zones[z-1] + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + CWTLine[0] + "\"" + " AdditionalAmount=" + "\"" + words[z] + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + CWTLine[z] + "</Rate>" + Environment.NewLine;
+                        rate = "\t<Rate Zone=" + "\"" + zones[z - 1] + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + CWTLine[0] + "\"" + " AdditionalAmount=" + "\"" + words[z] + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + CWTLine[z] + "</Rate>" + Environment.NewLine;
                         File.AppendAllText(saveLocation, rate);
                     }
                 }
@@ -237,12 +242,12 @@ public class XMLFile
                 if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
                 {
                     misc = "SINGLE";
-                    
+
                 }
                 else if ((s.Split(null))[1].Equals("MULTI_PIECE"))
                 {
                     misc = "MULTI";
-                    
+
                 }
                 else
                 {
@@ -267,7 +272,7 @@ public class XMLFile
             else if (s.Contains("[LETTER]"))
             {
 
-                int bracketIndex = s.IndexOf("]")+1;
+                int bracketIndex = s.IndexOf("]") + 1;
                 int bracketSpace = s.IndexOf(" ");
                 if (bracketIndex != bracketSpace)
                 {
@@ -275,7 +280,7 @@ public class XMLFile
                     Console.WriteLine("Need a space after [LETTER] at line: {0}", lineNum);
                     Console.ResetColor();
                 }
-                
+
                 //adds space between sections
                 rate += Environment.NewLine;
                 File.AppendAllText(saveLocation, rate);
@@ -323,7 +328,7 @@ public class XMLFile
                             rateRead = nums[i];
                             //For packages
                             rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }                   
+                        }
                         else
                         {
 
@@ -343,14 +348,14 @@ public class XMLFile
 
     public static void Main(String[] args)
     {
-       
-        
+
+
         XMLFile test = new XMLFile();
-      
+
         test.splitTags();
         Console.WriteLine("Press any key to exit");
         Console.ReadLine();
-        
+
         System.Environment.Exit(1);
 
     }
