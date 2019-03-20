@@ -201,7 +201,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         }
     }
 
-    private void CWTFun()
+    private void CWTFun(string s)
     {
         for (int z = 1; z < words.Length; z++)
         {
@@ -231,7 +231,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
         }
     }
-    private void RateTypeFun()
+    private void RateTypeFun(string s)
     {
         if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
         {
@@ -251,7 +251,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         }
         conditionalCheck = true;
     }
-    private void ConditionalFun()
+    private void ConditionalFun(string s)
     {
         if ((s.Split(null))[1].Equals("DOCUMENTS"))
         {
@@ -259,7 +259,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         }
         conditionalCheck = true;
     }
-    private void LetterFun()
+    private void LetterFun(string s)
     {
         int bracketIndex = s.IndexOf("]") + 1;
         int bracketSpace = s.IndexOf(" ");
@@ -294,6 +294,39 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
     {
         File.AppendAllText(saveLocation, Environment.NewLine);
     }
+    private void RatesProcessorFun(string s)
+    {
+        rate = Environment.NewLine;
+        File.AppendAllText(saveLocation, rate);
+        rate = "";
+        //Length cannot be less than 0 RUNTIME error
+        if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
+        {
+            string[] nums = s.Split(null);
+            CWTLine = nums;
+            weight = nums[0];
+            for (int i = 1; i < nums.Length; i++)
+            {
+                if (nums[i] != "_" && conditionalCheck == false)
+                {
+                    rateRead = nums[i];
+                    //For packages
+                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                }
+                else if (nums[i] != "_" && conditionalCheck == true)
+                {
+                    rateRead = nums[i];
+                    //For packages
+                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                }
+                else
+                {
+
+                }
+            }
+            File.AppendAllText(saveLocation, rate);
+        }
+    }
     public void splitTags()
     {
         //reading rates and nothing else
@@ -307,7 +340,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
             else if (words[0].Equals("-"))// CWT related files access here
             {
-                CWTFun();
+                CWTFun(s);
             }
             else if (s.Contains("[TIER]"))
             {
@@ -320,11 +353,11 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
             else if (s.Contains("[RATETYPE]"))
             {
-                RateTypeFun();
+                RateTypeFun(s);
             }
             else if (s.Contains("[CONDITIONAL]"))
             {
-                ConditionalFun();
+                ConditionalFun(s);
             }
             else if (s.Contains("[ZONES]"))
             {
@@ -332,7 +365,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
             else if (s.Contains("[LETTER]"))
             {
-                LetterFun();
+                LetterFun(s);
             }
             else if (s.Contains("[END]"))
             {
@@ -340,36 +373,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
             else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
-                rate = Environment.NewLine;
-                File.AppendAllText(saveLocation, rate);
-                rate = "";
-                //Length cannot be less than 0 RUNTIME error
-                if (Double.TryParse(s.Substring(0, s.IndexOf('\t')), out checkVar))
-                {
-                    string[] nums = s.Split(null);
-                    CWTLine = nums;
-                    weight = nums[0];
-                    for (int i = 1; i < nums.Length; i++)
-                    {
-                        if (nums[i] != "_" && conditionalCheck == false)
-                        {
-                            rateRead = nums[i];
-                            //For packages
-                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }
-                        else if (nums[i] != "_" && conditionalCheck == true)
-                        {
-                            rateRead = nums[i];
-                            //For packages
-                            rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + misc + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                        }
-                        else
-                        {
-
-                        }
-                    }
-                    File.AppendAllText(saveLocation, rate);
-                }
+                RatesProcessorFun(s);
             }
             else
             {
