@@ -150,6 +150,150 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         }
     }
 
+    private void StartFun()
+    {
+        pkgtype = "";
+        misc = "";
+        qtymethod = "Combination";
+        currency = "";
+        service = "";
+        version = "1";
+        qtyunits = "";
+        regionmethod = "Zone";
+        zones = new List<string>();
+        weight = "";
+        rateRead = "";
+        conditionalCheck = false;
+        extFile = false;
+        extFilesSingle = new string[1];
+        extFilesMulti = new string[1];
+
+        //Adds what you want after the skippable tag
+
+        if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF") || words[2].Contains("_CWT"))
+        {
+
+            if (!words[2].Equals(prevService))
+            {
+                service = words[2];
+                prevService = service;
+            }
+
+            extFilesSingle = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_SINGLE.txt", SearchOption.TopDirectoryOnly);
+
+            if (extFilesSingle.Length > 0)
+            {
+                extFile = true;
+            }
+
+            extFilesMulti = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_MULTI.txt", SearchOption.TopDirectoryOnly);
+
+            if (extFilesMulti.Length > 0)
+            {
+                extFile = true;
+            }
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Invalid service at line: {0}", lineNum);
+            Console.ResetColor();
+        }
+    }
+
+    private void CWTFun()
+    {
+        for (int z = 1; z < words.Length; z++)
+        {
+            if (!s[z].Equals("-") && !s[z].Equals(" "))
+            {
+                rate = "\t<Rate Zone=" + "\"" + zones[z - 1] + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + CWTLine[0] + "\"" + " AdditionalAmount=" + "\"" + words[z] + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + CWTLine[z] + "</Rate>" + Environment.NewLine;
+                File.AppendAllText(saveLocation, rate);
+            }
+        }
+
+        File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
+    }
+
+    private void TierFun()
+    {
+
+    }
+    private void RateMethodFun()
+    {
+        //Adds what you want after the skippable tag
+        temp = new List<string>();
+        foreach (var word in words)
+        {
+            if (word != "[RATEMETHOD]" && word != " ")
+            {
+                temp.Add(word);
+            }
+        }
+    }
+    private void RateTypeFun()
+    {
+        if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
+        {
+            misc = "SINGLE";
+
+        }
+        else if ((s.Split(null))[1].Equals("MULTI_PIECE"))
+        {
+            misc = "MULTI";
+
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("[RATETYPE] needs value SINGLE_PIECE OR MULTIPIECE at line: {0}", lineNum);
+            Console.ResetColor();
+        }
+        conditionalCheck = true;
+    }
+    private void ConditionalFun()
+    {
+        if ((s.Split(null))[1].Equals("DOCUMENTS"))
+        {
+            misc = "DOCS";
+        }
+        conditionalCheck = true;
+    }
+    private void LetterFun()
+    {
+        int bracketIndex = s.IndexOf("]") + 1;
+        int bracketSpace = s.IndexOf(" ");
+        if (bracketIndex != bracketSpace)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Need a space after [LETTER] at line: {0}", lineNum);
+            Console.ResetColor();
+        }
+
+        //adds space between sections
+        rate += Environment.NewLine;
+        File.AppendAllText(saveLocation, rate);
+        rate = "";
+        weight = "0";
+        pkgtype = "CARRIER_LETTER";
+        string[] nums = s.Split(null);
+        for (int i = 1; i < nums.Length; i++)
+        {
+            if (nums[i] != "_")
+            {
+                rateRead = nums[i];
+                //For packages
+                rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+            }
+        }
+        File.AppendAllText(saveLocation, rate);
+    }
+
+
+    private void EndFun()
+    {
+        File.AppendAllText(saveLocation, Environment.NewLine);
+    }
     public void splitTags()
     {
         //reading rates and nothing else
@@ -159,111 +303,28 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             words = s.Split(null);
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
-
-                pkgtype = "";
-                misc = "";
-                qtymethod = "Combination";
-                currency = "";
-                service = "";
-                version = "1";
-                qtyunits = "";
-                regionmethod = "Zone";
-                zones = new List<string>();
-                weight = "";
-                rateRead = "";
-                conditionalCheck = false;
-                extFile = false;
-                extFilesSingle = new string[1];
-                extFilesMulti = new string[1];
-
-                //Adds what you want after the skippable tag
-
-                if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF") || words[2].Contains("_CWT"))
-                {
-
-                    if (!words[2].Equals(prevService))
-                    {
-                        service = words[2];
-                        prevService = service;
-                    }
-
-                    extFilesSingle = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_SINGLE.txt", SearchOption.TopDirectoryOnly);
-
-                    if (extFilesSingle.Length > 0)
-                    {
-                        extFile = true;
-                    }
-
-                    extFilesMulti = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_MULTI.txt", SearchOption.TopDirectoryOnly);
-
-                    if (extFilesMulti.Length > 0)
-                    {
-                        extFile = true;
-                    }
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Invalid service at line: {0}", lineNum);
-                    Console.ResetColor();
-                }
+                StartFun();
             }
             else if (words[0].Equals("-"))// CWT related files access here
             {
-                for (int z = 1; z < words.Length; z++)
-                {
-                    if (!s[z].Equals("-") && !s[z].Equals(" "))
-                    {
-                        rate = "\t<Rate Zone=" + "\"" + zones[z - 1] + "\"" + " Weight=" + "\"" + "999999" + "\" " + "WeightBasis=" + "\"" + CWTLine[0] + "\"" + " AdditionalAmount=" + "\"" + words[z] + "\"" + " WeightIncrement=" + "\"" + "1" + "\"" + ">" + CWTLine[z] + "</Rate>" + Environment.NewLine;
-                        File.AppendAllText(saveLocation, rate);
-                    }
-                }
-
-                File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
+                CWTFun();
             }
             else if (s.Contains("[TIER]"))
             {
                 //ADD later once we get a definition of what to include
+                TierFun();
             }
             else if (s.Contains("[RATEMETHOD]"))//Stopping point
             {
-                //Adds what you want after the skippable tag
-                temp = new List<string>();
-                foreach (var word in words)
-                {
-                    if (word != "[RATEMETHOD]" && word != " ")
-                    {
-                        temp.Add(word);
-                    }
-                }
+                RateMethodFun();
             }
             else if (s.Contains("[RATETYPE]"))
             {
-                if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
-                {
-                    misc = "SINGLE";
-
-                }
-                else if ((s.Split(null))[1].Equals("MULTI_PIECE"))
-                {
-                    misc = "MULTI";
-
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("[RATETYPE] needs value SINGLE_PIECE OR MULTIPIECE at line: {0}", lineNum);
-                    Console.ResetColor();
-                }
-                conditionalCheck = true;
+                RateTypeFun();
             }
             else if (s.Contains("[CONDITIONAL]"))
             {
-                if ((s.Split(null))[1].Equals("DOCUMENTS"))
-                {
-                    misc = "DOCS";
-                }
-                conditionalCheck = true;
+                ConditionalFun();
             }
             else if (s.Contains("[ZONES]"))
             {
@@ -271,38 +332,11 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
             else if (s.Contains("[LETTER]"))
             {
-
-                int bracketIndex = s.IndexOf("]") + 1;
-                int bracketSpace = s.IndexOf(" ");
-                if (bracketIndex != bracketSpace)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Need a space after [LETTER] at line: {0}", lineNum);
-                    Console.ResetColor();
-                }
-
-                //adds space between sections
-                rate += Environment.NewLine;
-                File.AppendAllText(saveLocation, rate);
-                rate = "";
-                weight = "0";
-                pkgtype = "CARRIER_LETTER";
-                string[] nums = s.Split(null);
-                for (int i = 1; i < nums.Length; i++)
-                {
-                    if (nums[i] != "_")
-                    {
-                        rateRead = nums[i];
-                        //For packages
-                        rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "PkgType=" + "\"" + pkgtype + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
-                    }
-                }
-                File.AppendAllText(saveLocation, rate);
-
+                LetterFun();
             }
             else if (s.Contains("[END]"))
             {
-                File.AppendAllText(saveLocation, Environment.NewLine);
+                EndFun();
             }
             else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
             {
@@ -343,7 +377,7 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             }
         }
 
-        File.AppendAllText(saveLocation, closingchart + Environment.NewLine + "</PBChardLoader>");
+        File.AppendAllText(saveLocation, closingchart + Environment.NewLine + "</PBChartLoader>");
     }
 
     public static void Main(String[] args)
