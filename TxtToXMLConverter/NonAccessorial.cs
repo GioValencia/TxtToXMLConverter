@@ -18,10 +18,11 @@ public class ReadFile
 
 public class XMLFile
 {
+    int count = 0;
 
 
     //change filename to dynamic
-     static string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
+    static string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     private string[] txtDoc;
     private string[] XMLArr;
     List<string>[] tagData = new List<string>[1000];
@@ -33,12 +34,13 @@ public class XMLFile
     //Variables
     string pkgtype = "";
     //CW
-    static string type = Console.ReadLine();
+    
+    
     static string groupCarrier = "";
     static string code = "";
     static string chartName = "";
     //CW
-    static string origin = Console.ReadLine();
+    
     string[] CWTLine = new string[1];
     bool conditionalCheck = false;
     bool ratetypeCheck = false;
@@ -61,28 +63,13 @@ public class XMLFile
     string start = DateTime.Now.ToString("yyyyMMdd");
     static string end = DateTime.Today.AddYears(+100).ToString("yyyyMMdd");
     //CW
-    static string userStart = Console.ReadLine();
-    static string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
-    static string closingchart = "</Chart>";
-
-File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart + Environment.NewLine);
-
-        string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
-
-    File.AppendAllText(saveLocation, Environment.NewLine);
-
-        //Chart
-
-    static string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+    string rateGroup = "<RateGroup Version=\"1\" QtyMethod=" + "\"" + qtymethod + "\"" + " QtyUnits=" + "\"" + qtyunits + "\"" + " RegionMethod=\"Zone\" " + "Currency=" + "\"" + currency + "\"" + " Service=" + "\"" + service + "\">";
+    string closingchart = "</Chart>";
     string closingRateGroupTag = "</RateGroup>";
     string rate = "";
-    string closingRateTag = "</Rate>";
-
-    //Variables
+    
 
 
-    rateGroup += closingRateGroupTag + Environment.NewLine;
-    File.AppendAllText(saveLocation, rateGroup);
 
     public XMLFile(/*ReadFile file*/)
     {
@@ -112,6 +99,14 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
 
     private void zonesFun()
     {
+        
+        if (count == 0)
+        {
+            Variables();
+            count++;
+        }
+        
+        
         zones = new List<string>();
 
         foreach (var word in words)
@@ -136,20 +131,20 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         if (service.Equals("XPP") || service.Equals("XPS") || service.Equals("STD") || service.Equals("XSS") || service.Equals("XPD"))
         {
             qtyunits = "KG";
-            rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+          rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
         }
         else
         {
             qtyunits = "LB";
-            rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
+          rateGroup = "<RateGroup Version= " + "\"" + version + "\"" + " QtyMethod=" + "\"" + qtymethod + "\" " + "QtyUnits=" + "\"" + qtyunits + "\" " + "RegionMethod=" + "\"" + regionmethod + "\" " + "Currency=" + "\"" + currency + "\" " + "Service=" + "\"" + service + "\" " + ">";
         }
 
         if (!service.Contains("_CWT"))
         {
-            File.AppendAllText(saveLocation, rateGroup + Environment.NewLine);
+            File.AppendAllText(saveLocation,  rateGroup + Environment.NewLine);
         }
     }
-
+    
     private void StartFun()
     {
         pkgtype = "";
@@ -167,6 +162,8 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         extFile = false;
         extFilesSingle = new string[1];
         extFilesMulti = new string[1];
+
+        
 
         //Adds what you want after the skippable tag
 
@@ -327,8 +324,10 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
             File.AppendAllText(saveLocation, rate);
         }
     }
+
     public void splitTags()
     {
+       
         //reading rates and nothing else
         foreach (string s in txtDoc)
         {
@@ -384,16 +383,50 @@ File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart
         File.AppendAllText(saveLocation, closingchart + Environment.NewLine + "</PBChartLoader>");
     }
 
+    private void Variables()
+    {
+        
+        Console.WriteLine("Write the start Date");
+        string userStart = Console.ReadLine();
+        Console.WriteLine("Type in Rate or Zone");
+        string type = Console.ReadLine();
+        Console.WriteLine("Type in Origin.");
+        string origin = Console.ReadLine();
+        string chart = "<Chart Type=" + "\"" + type + "\"" + " Start=" + "\"" + userStart + "\" " + "End=" + "\"" + end + "\" " + "Origin=" + "\"" + origin + "\">"; // Origin should be dynamic iso2 iso
+
+
+        File.AppendAllText(saveLocation, "<PBChartLoader>" + Environment.NewLine + chart + Environment.NewLine);
+
+        string carrierString = "<Group Carrier=" + "\"" + groupCarrier + "\"" + " Code=" + "\"" + code + "\"" + " Name=" + "\"" + chartName + "\"";
+
+        File.AppendAllText(saveLocation, Environment.NewLine);
+
+        //Chart
+
+
+
+
+        string closingRateTag = "</Rate>";
+
+        //Variables
+
+
+        rateGroup += closingRateGroupTag + Environment.NewLine;
+        File.AppendAllText(saveLocation, rateGroup);
+       
+    }
+
+
     public static void Main(String[] args)
     {
 
-
+        
         XMLFile test = new XMLFile();
 
         test.splitTags();
         Console.WriteLine("Press any key to exit");
         Console.ReadLine();
-
+        
         System.Environment.Exit(1);
 
     }
