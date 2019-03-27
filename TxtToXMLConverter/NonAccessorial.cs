@@ -23,8 +23,10 @@ public class XMLFile
 
     //change filename to dynamic
     static string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
+    static string saveLocationTest = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_Test.xml");
     private string[] txtDoc;
     private string[] XMLArr;
+    
     List<string>[] tagData = new List<string>[1000];
     int lineNum = 0;
     List<string> temp;
@@ -69,6 +71,7 @@ public class XMLFile
     string closingchart = "</Chart>";
     string closingRateGroupTag = "</RateGroup>";
     string rate = "";
+    string rateSingle = "";
     
 
 
@@ -77,6 +80,7 @@ public class XMLFile
     {
         //saveLocation = Path.Combine(file.filePath, "_TXTinXMLFormat.txt");
         txtDoc = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + "EXP.txt");
+        
     }
 
     //Saves XML file at location specified, currently set to Desktop by default
@@ -149,23 +153,28 @@ public class XMLFile
     private void SingleP()
     {
         // make a new value for rate but call it singlerate and assignit to  rate += combine with multirate in the end
-       var single =File.OpenRead(extFilesSingle.ToString());
-       string[] lines = System.IO.File.ReadAllLines(single.ToString());
-       foreach(string s in lines)
+
+
+        foreach (string s in extFilesSingle)
         {
-            string[] rateS = s.Split(null);
-            for (int i = 1; i < rateS.Length; i++)
+            // string[] rateS = s.Split(null);
+            words = s.Split(null);
+            for (int i = 1; i < words.Length; i++)
             {
                 double Num;
-                bool isNum = double.TryParse(rateS[i], out Num);
+                bool isNum = double.TryParse(words[i], out Num);
+                weight = words[0];
                 if (isNum)
                 {
+
                     rateRead = Num.ToString();
-                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "SINGLE" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                    rateSingle += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "SINGLE" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
                 }
-                
+
             }
+            
         }
+        File.AppendAllText(saveLocationTest, rateSingle);
     }
     private void MultiP()
     {
@@ -220,7 +229,7 @@ public class XMLFile
                 prevService = service;
             }
 
-            extFilesSingle = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_SINGLE.txt", SearchOption.TopDirectoryOnly);
+            extFilesSingle = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + "STD_SINGLE.txt");
 
             if (extFilesSingle.Length > 1)
             {
@@ -415,14 +424,6 @@ public class XMLFile
             {
                 LetterFun(s);
             }
-            else if (a)//Test We can delete later
-            {
-                SingleP();
-            }
-            else if (b)
-            {
-                MultiP();//Test we can delete later
-            }
             else if (s.Contains("[END]"))
             {
                 EndFun();
@@ -480,7 +481,8 @@ public class XMLFile
         
         XMLFile test = new XMLFile();
 
-        test.splitTags();
+         test.splitTags();
+        test.SingleP();
         Console.WriteLine("Press any key to exit");
         Console.ReadLine();
         
