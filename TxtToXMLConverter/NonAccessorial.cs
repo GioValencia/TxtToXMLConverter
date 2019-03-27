@@ -34,8 +34,10 @@ public class XMLFile
     //Variables
     string pkgtype = "";
     //CW
-    
-    
+    bool a = extFilesSingle.ToString() == "1";
+    bool b = extFilesMulti.ToString() == "1";//Test can delete
+
+
     static string groupCarrier = "";
     static string code = "";
     static string chartName = "";
@@ -55,8 +57,8 @@ public class XMLFile
     string weight = "";
     string rateRead = "";
     bool extFile = false; //External files for Single and Multi refer to this
-    string[] extFilesSingle = new string[0]; //External files are populated here
-    string[] extFilesMulti = new string[0];
+   static string[] extFilesSingle = new string[0]; //External files are populated here
+   static string[] extFilesMulti = new string[0];
     string prevService = "";
     //Chart
    
@@ -144,7 +146,49 @@ public class XMLFile
             File.AppendAllText(saveLocation,  rateGroup + Environment.NewLine);
         }
     }
-    
+    private void SingleP()
+    {
+        // make a new value for rate but call it singlerate and assignit to  rate += combine with multirate in the end
+       var single =File.OpenRead(extFilesSingle.ToString());
+       string[] lines = System.IO.File.ReadAllLines(single.ToString());
+       foreach(string s in lines)
+        {
+            string[] rateS = s.Split(null);
+            for (int i = 1; i < rateS.Length; i++)
+            {
+                double Num;
+                bool isNum = double.TryParse(rateS[i], out Num);
+                if (isNum)
+                {
+                    rateRead = Num.ToString();
+                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "SINGLE" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                }
+                
+            }
+        }
+    }
+    private void MultiP()
+    {
+        var multi = File.OpenRead(extFilesMulti.ToString());
+        string[] lines = System.IO.File.ReadAllLines(multi.ToString());
+        foreach (string m in lines)
+        {
+            string[] rateM = m.Split(null);
+            for (int i = 1; i < rateM.Length; i++)
+            {
+                double Num;
+                bool isNum = double.TryParse(rateM[i], out Num);
+                if (isNum)
+                {
+                    rateRead = Num.ToString();
+                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "MULTI" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                }
+            }
+
+            
+        }
+      
+    }
     private void StartFun()
     {
         pkgtype = "";
@@ -162,8 +206,8 @@ public class XMLFile
         extFile = false;
         extFilesSingle = new string[1];
         extFilesMulti = new string[1];
+   
 
-        
 
         //Adds what you want after the skippable tag
 
@@ -178,17 +222,20 @@ public class XMLFile
 
             extFilesSingle = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_SINGLE.txt", SearchOption.TopDirectoryOnly);
 
-            if (extFilesSingle.Length > 0)
+            if (extFilesSingle.Length > 1)
             {
                 extFile = true;
             }
 
             extFilesMulti = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_MULTI.txt", SearchOption.TopDirectoryOnly);
 
-            if (extFilesMulti.Length > 0)
+            if (extFilesMulti.Length > 1)
             {
                 extFile = true;
             }
+
+           
+          
         }
         else
         {
@@ -336,6 +383,7 @@ public class XMLFile
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
                 StartFun();
+
             }
             else if (words[0].Equals("-"))// CWT related files access here
             {
@@ -353,6 +401,7 @@ public class XMLFile
             else if (s.Contains("[RATETYPE]"))
             {
                 RateTypeFun(s);
+                
             }
             else if (s.Contains("[CONDITIONAL]"))
             {
@@ -365,6 +414,14 @@ public class XMLFile
             else if (s.Contains("[LETTER]"))
             {
                 LetterFun(s);
+            }
+            else if (a)//Test We can delete later
+            {
+                SingleP();
+            }
+            else if (b)
+            {
+                MultiP();//Test we can delete later
             }
             else if (s.Contains("[END]"))
             {
@@ -404,7 +461,7 @@ public class XMLFile
         //Chart
 
 
-
+        
 
         string closingRateTag = "</Rate>";
 
