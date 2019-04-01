@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Linq.Expressions;
 
 public class ReadFile
 {
@@ -72,6 +73,7 @@ public class XMLFile
     string closingRateGroupTag = "</RateGroup>";
     string rate = "";
     string rateSingle = "";
+    string rateMulti = "";
     
 
 
@@ -148,7 +150,13 @@ public class XMLFile
         if (!service.Contains("_CWT"))
         {
             File.AppendAllText(saveLocation,  rateGroup + Environment.NewLine);
+            
         }
+        else if(service.Contains("_CWT"))
+        {
+            File.AppendAllText(saveLocation,  Environment.NewLine);
+        }
+        
     }
     private void SingleP()
     {
@@ -174,29 +182,35 @@ public class XMLFile
             }
             
         }
-        File.AppendAllText(saveLocationTest, rateSingle);
+        File.AppendAllText(saveLocation, rateSingle + Environment.NewLine);
     }
     private void MultiP()
     {
-        var multi = File.OpenRead(extFilesMulti.ToString());
-        string[] lines = System.IO.File.ReadAllLines(multi.ToString());
-        foreach (string m in lines)
+        foreach (string s in extFilesMulti)
         {
-            string[] rateM = m.Split(null);
-            for (int i = 1; i < rateM.Length; i++)
+            // string[] rateS = s.Split(null);
+            words = s.Split(null);
+            for (int i = 1; i < words.Length; i++)
             {
                 double Num;
-                bool isNum = double.TryParse(rateM[i], out Num);
-                if (isNum)
+                bool isNum = double.TryParse(words[i], out Num);
+                weight = words[0];
+                if (isNum && !words[0].Contains("-") && !words[0].Contains("TIER"))
                 {
+                     
                     rateRead = Num.ToString();
-                    rate += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "MULTI" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                    rateMulti += "\t<Rate Zone=" + "\"" + zones[i - 1] + "\"" + " Weight=" + "\"" + weight + "\" " + "Misc=" + "\"" + "MULTI" + "\"" + ">" + rateRead + "</Rate>" + Environment.NewLine;
+                   
                 }
+
             }
 
-            
         }
-      
+        
+            File.AppendAllText(saveLocation, rateMulti + Environment.NewLine);
+       
+        
+
     }
     private void StartFun()
     {
@@ -229,14 +243,18 @@ public class XMLFile
                 prevService = service;
             }
 
-            extFilesSingle = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + "STD_SINGLE.txt");
+          
+            int serviceIndex = service.IndexOf("_");
+            extFilesSingle = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + (service.Contains("_CWT") ? service = service.Substring(0,serviceIndex) : service)  + "_SINGLE.txt");
+
+
 
             if (extFilesSingle.Length > 1)
             {
                 extFile = true;
             }
 
-            extFilesMulti = Directory.GetFiles(@"C:\Program Files (x86)\", service + "_MULTI.txt", SearchOption.TopDirectoryOnly);
+            extFilesMulti = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + (service.Contains("_CWT") ? service = service.Substring(0, serviceIndex) : service) + "_MULTI.txt");
 
             if (extFilesMulti.Length > 1)
             {
@@ -265,7 +283,7 @@ public class XMLFile
             }
         }
 
-        File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
+       File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
     }
 
     private void TierFun()
@@ -392,6 +410,8 @@ public class XMLFile
             if (s.Contains("[START]")/*or anything else you wanna skip*/)
             {
                 StartFun();
+            //    SingleP();
+              //  MultiP();
 
             }
             else if (words[0].Equals("-"))// CWT related files access here
@@ -423,9 +443,11 @@ public class XMLFile
             else if (s.Contains("[LETTER]"))
             {
                 LetterFun(s);
+               // SingleP();
             }
             else if (s.Contains("[END]"))
             {
+                
                 EndFun();
             }
             else if (s.Length >= 0 && (s[1].Equals('.') || s[2].Equals('.')))
@@ -482,7 +504,7 @@ public class XMLFile
         XMLFile test = new XMLFile();
 
          test.splitTags();
-        test.SingleP();
+        
         Console.WriteLine("Press any key to exit");
         Console.ReadLine();
         
