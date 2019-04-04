@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
-using System.Linq.Expressions;
 
 public class ReadFile
 {
@@ -22,11 +20,10 @@ public class XMLFile
     int count = 0;
 
 
-    //change filename to dynamic
+    //change filename to an appropriate name, save location can also be changed
     static string saveLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_TXTinXMLFormat.xml");
     static string saveLocationTest = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "_Test.xml");
     private string[] txtDoc;
-    private string[] XMLArr;
     
     List<string>[] tagData = new List<string>[1000];
     int lineNum = 0;
@@ -36,16 +33,13 @@ public class XMLFile
 
     //Variables
     string pkgtype = "";
-    //CW
-    bool a = extFilesSingle.ToString() == "1";
-    bool b = extFilesMulti.ToString() == "1";//Test can delete
-
 
     static string groupCarrier = "";
     static string code = "";
     static string chartName = "";
     //CW
     
+        //some defaults set here, and when START is read, the defaults are reset
     string[] CWTLine = new string[1];
     bool conditionalCheck = false;
     bool ratetypeCheck = false;
@@ -77,34 +71,14 @@ public class XMLFile
     
 
 
-
+    //Currently default location is set to Desktop and specific file for testing purposes. This can be changed with no issue as long as the new file matches the format of EXP.txt
     public XMLFile(/*ReadFile file*/)
     {
-        //saveLocation = Path.Combine(file.filePath, "_TXTinXMLFormat.txt");
         txtDoc = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + "EXP.txt");
         
     }
 
-    //Saves XML file at location specified, currently set to Desktop by default
-    public void saveXML(string[] XMLarr)
-    {
-        File.WriteAllLines(saveLocation, XMLArr);
-    }
-
-    //Changes the txtDoc array to a format readable in XML
-    public void formatFile()
-    {
-        //Need to double check exact formatting for the test files before i include anything
-
-        //Grab txtDoc
-        //change each line to have appropriate labels in XML format   (delimiter == " ") (if (txtDoc[0].contains("[START]")))
-        //if makes easier, make different arrays for each label
-        //make another string array adding each previous line in the order they will be printed
-
-
-        saveXML(XMLArr);
-    }
-
+    //Currently Zones is setting only the Numeric value it sees. To change this, change the index value to any section of the word
     private void zonesFun()
     {
         
@@ -131,7 +105,7 @@ public class XMLFile
 
             }
         }
-
+        //EUR Specific values
         version = "1";
         qtymethod = "Combination";
         regionmethod = "Zone";
@@ -158,6 +132,10 @@ public class XMLFile
         }
         
     }
+    
+
+
+    //For Single - not finished yet, not implemented yet
     private void SingleP()
     {
         // make a new value for rate but call it singlerate and assignit to  rate += combine with multirate in the end
@@ -184,6 +162,8 @@ public class XMLFile
         }
         File.AppendAllText(saveLocation, rateSingle + Environment.NewLine);
     }
+
+    //For Multi, not finished yet, not implemented yet
     private void MultiP()
     {
         foreach (string s in extFilesMulti)
@@ -212,8 +192,11 @@ public class XMLFile
         
 
     }
+
+    //When [START] is read
     private void StartFun()
     {
+        //Setting defaults
         pkgtype = "";
         misc = "";
         qtymethod = "Combination";
@@ -232,38 +215,32 @@ public class XMLFile
    
 
 
-        //Adds what you want after the skippable tag
+        //Adds what you want after the START tag
 
         if (words[2].Equals("XPP") || words[2].Equals("XPS") || words[2].Equals("STD") || words[2].Equals("XSS") || words[2].Equals("XPD") || words[2].Equals("GND") || words[2].Equals("THREEDAY") || words[2].Equals("TWODAY") || words[2].Equals("TWODAY_AM") || words[2].Equals("NEXTDAY_SAVER") || words[2].Equals("NEXTDAY") || words[2].Equals("NEXTDAY_EARLY") || words[2].Equals("XPSNA1") || words[2].Equals("WEF") || words[2].Contains("_CWT"))
         {
-
+            //This logic was implemented for DOCUMENTS section so it may be added without creating a new rategroup. If the current service being read is different, it would change the current service variable
             if (!words[2].Equals(prevService))
             {
                 service = words[2];
                 prevService = service;
             }
 
-          
-            int serviceIndex = service.IndexOf("_");
-            extFilesSingle = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + (service.Contains("_CWT") ? service = service.Substring(0,serviceIndex) : service)  + "_SINGLE.txt");
-
-
-
+            //Validate that a SINGLE file exists
             if (extFilesSingle.Length > 1)
             {
                 extFile = true;
             }
 
-            extFilesMulti = File.ReadAllLines(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + "\\" + (service.Contains("_CWT") ? service = service.Substring(0, serviceIndex) : service) + "_MULTI.txt");
-
+            //Validate that a MULTI file exists
             if (extFilesMulti.Length > 1)
             {
                 extFile = true;
             }
-
-           
           
         }
+
+        //Error message
         else
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -272,6 +249,7 @@ public class XMLFile
         }
     }
 
+    //CWT section parser
     private void CWTFun(string s)
     {
         for (int z = 1; z < words.Length; z++)
@@ -286,10 +264,12 @@ public class XMLFile
        File.AppendAllText(saveLocation, closingRateGroupTag + Environment.NewLine);
     }
 
+    //Tiers would be implemented here
     private void TierFun()
     {
 
     }
+    //Ratemethod title parser
     private void RateMethodFun()
     {
         //Adds what you want after the skippable tag
@@ -302,6 +282,7 @@ public class XMLFile
             }
         }
     }
+    //RateType parser
     private void RateTypeFun(string s)
     {
         if ((s.Split(null))[1].Equals("SINGLE_PIECE"))
@@ -322,6 +303,7 @@ public class XMLFile
         }
         conditionalCheck = true;
     }
+    //Documents tag parser
     private void ConditionalFun(string s)
     {
         if ((s.Split(null))[1].Equals("DOCUMENTS"))
@@ -330,6 +312,7 @@ public class XMLFile
         }
         conditionalCheck = true;
     }
+    //Letter parser and rates
     private void LetterFun(string s)
     {
         int bracketIndex = s.IndexOf("]") + 1;
@@ -360,11 +343,12 @@ public class XMLFile
         File.AppendAllText(saveLocation, rate);
     }
 
-
+    // Write a new line, just shortened to a smaller function call, can be editted to include more information
     private void EndFun()
     {
         File.AppendAllText(saveLocation, Environment.NewLine);
     }
+    //General rates processor, once ZONES are implemented, this function will need to be altered to include the CORRECT zones info
     private void RatesProcessorFun(string s)
     {
         rate = Environment.NewLine;
@@ -399,6 +383,7 @@ public class XMLFile
         }
     }
 
+    //For each tag in the TXT file, this function calls each appropriate function
     public void splitTags()
     {
        
@@ -463,6 +448,7 @@ public class XMLFile
         File.AppendAllText(saveLocation, closingchart + Environment.NewLine + "</PBChartLoader>");
     }
 
+    //Set the dynamic variables at the beginning of the file, this is technically unneeded but not sure if that information is static
     private void Variables()
     {
         
@@ -483,11 +469,6 @@ public class XMLFile
 
         //Chart
 
-
-        
-
-        string closingRateTag = "</Rate>";
-
         //Variables
 
 
@@ -504,9 +485,6 @@ public class XMLFile
         XMLFile test = new XMLFile();
 
          test.splitTags();
-        
-        Console.WriteLine("Press any key to exit");
-        Console.ReadLine();
         
         System.Environment.Exit(1);
 
